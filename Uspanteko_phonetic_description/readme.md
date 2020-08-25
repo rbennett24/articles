@@ -1,3 +1,6 @@
+# Article details #
+These materials are associated with an in-progress manuscript on the phonetics of Uspanteko.
+
 # Disclaimer #
 These materials are posted in the spirit of transparency, but also in case they're useful for someone else. I've made very little effort to clean up or otherwise normalize filenames, code, etc.
 
