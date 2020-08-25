@@ -1,11 +1,3 @@
-###################################
-#
-# Consider looking at non-normalized contours for tone, especially on short vowels, to see if something like rate of increase is the best correlate of the tonal contrast rather than absolute value.
-#
-# Alternatively, plot max peak position relative to segment start
-#
-# Linear discriminant analysis
-
 ######################################################
 # Preliminaries and data preparation
 ######################################################
@@ -42,14 +34,14 @@ showColor(cbBW)
 library(extrafont)
 
 ##########
-# This only needs to be done once on each computer, I think.
+# This only needs to be done once on each computer, I think. It may need to be done again whenever you update R.
 # font_import(prompt = F,pattern="DoulosSIL-R") # Import system fonts -- this can take awhile if you import them all
 # loadfonts(device = "win") # I think you only need to do this once so that R imports all the needed files to a place it can draw on them?
 # windowsFonts() # This will just show you which fonts are available to R -- it may be a long list!
 ##########
 
 # Check that desired fonts are loaded.
-# subset(fonttable(),FontName=="DoulosSIL")
+subset(fonttable(),FontName=="DoulosSIL")
 
 
 ##################
@@ -57,9 +49,8 @@ library(extrafont)
 user = "Tiamat"
 
 basedir = paste0("C:/Users/",user,"/Dropbox/Research/Mayan/Uspanteko/Uspanteko_NSF_project/")
-# datadir = paste0(basedir,"Recordings/QA_data_for_analysis/FA_input/Files_for_Praat_analysis/Praat_measures/")
 datadir = paste0(basedir,"Recordings/QA_data_for_analysis/FA_output/FA_textgrids/Praat_measures/")
-paperdir = paste0(basedir,"Articles/Intonation/")
+paperdir = paste0(basedir,"Articles/Intonation/Second_submission/")
 
 setwd(datadir)
 
@@ -104,12 +95,17 @@ spk.demo<-subset(spk.demo,
 
 spk.demo
 
-# We didn't actually work with speaker 9, right?
+# Speaker 9 didn't actually complete the task.
 spk.demo<-subset(spk.demo,Speaker!="S09")
 
 nrow(spk.demo)
 summary(spk.demo$Age)
 sd(spk.demo$Age)
+
+spk.demo$Gender<-as.factor(spk.demo$Gender)
+spk.demo$Born<-as.factor(spk.demo$Born)
+spk.demo$Lives<-as.factor(spk.demo$Lives)
+
 summary(spk.demo$Gender)
 summary(spk.demo$Born)
 summary(spk.demo$Lives)
@@ -120,7 +116,8 @@ spk.demo
 ##################
 # Read in the QA data for vowel-level analysis.
 
-dataDateV = "Apr06"
+# dataDateV = "Aug07"
+dataDateV = "Aug17"
 
 QA.v.raw<-read.csv(paste0("Usp_QA_vowels_pitch_all_spkrs_",
                           dataDateV,
@@ -132,12 +129,36 @@ head(QA.v.raw)
 rm(dataDateV)
 
 
+#####################
+# Inspect each individual pitch tracing for each vowel.
+#####################
+QA.v.raw$vcode<-interaction(QA.v.raw$token.code,QA.v.raw$interval.num) # Duplicates some work done below.
+length(unique(QA.v.raw$token.code))
+length(unique(QA.v.raw$vcode))
+
+# Commented out so that it doesn't interrupt re-runs of the script.
+# 
+# for (vowel in unique(QA.v.raw$vcode)){
+#   contourData = subset(QA.v.raw,vcode==vowel)
+#   ylims<-c(unique(contourData$pitch.range.min)-10,unique(contourData$pitch.range.max)+10)
+#   thePlot<-ggplot(data=contourData)+
+#            geom_point(aes(x=step,y=pitch.Hz),size=4,color="firebrick")+
+#            geom_line(aes(x=step,y=pitch.Hz),color="firebrick")+
+#            theme_bw(base_size=24)+
+#            scale_y_continuous(limits=ylims)+
+#            scale_x_continuous(limits=c(1,9))+
+#            ggtitle(vowel)
+#   print(thePlot)
+#   readline(prompt="Press [enter] for next plot")
+# }
+
+
 #############
 # Define a simple density plot function for quick visualizations.
 simpleDensity<-function(df,datacol,title){
   ggplot(data=df)+
     geom_density(aes(x=datacol),
-                 fill=lightBlue,alpha=0.25,color="black",lwd=1.25)+
+                 fill=lightBlue,alpha=0.25,color="black",lwd=1.25,na.rm=T)+
     theme_bw(base_size=24)+
     xlab(title)
   
@@ -302,6 +323,55 @@ qqplot(QA.v.z.NOTNA$ST,
 abline(lm(QA.v.z.NOTNA$pitch.Hz.zscore~QA.v.z.NOTNA$ST),col="red")
 
 
+###############
+# Does it matter much if you do a semitone, ERB, or log transformation *before* taking z-scores? Not really, especially with outlier removal.
+
+# log
+QA.v.z.NOTNA$log<-log(QA.v.z.NOTNA$pitch.Hz)
+QA.v.z.NOTNA<-z.score(QA.v.z.NOTNA,"log")
+r<-cor(QA.v.z.NOTNA$log.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+r
+
+qqplot(QA.v.z.NOTNA$log.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+abline(lm(QA.v.z.NOTNA$pitch.Hz.zscore~QA.v.z.NOTNA$log.zscore),col="red")
+
+# Semitones
+QA.v.z.NOTNA<-z.score(QA.v.z.NOTNA,"ST")
+r<-cor(QA.v.z.NOTNA$ST.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+r
+
+qqplot(QA.v.z.NOTNA$ST.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+abline(lm(QA.v.z.NOTNA$pitch.Hz.zscore~QA.v.z.NOTNA$ST.zscore),col="red")
+
+
+# In fact, z-scores over semitones are basically *identical* to z-scores over log(Hz)! Not surprising given the nature of these two transformations.
+options(scipen=999)
+cor(QA.v.z.NOTNA$ST,
+    QA.v.z.NOTNA$log)
+cor(QA.v.z.NOTNA$ST.zscore,
+    QA.v.z.NOTNA$log.zscore)
+max(QA.v.z.NOTNA$ST.zscore-QA.v.z.NOTNA$log.zscore)
+options(scipen=0)
+plot(QA.v.z.NOTNA$ST.zscore-QA.v.z.NOTNA$log.zscore)
+
+
+# ERB
+QA.v.z.NOTNA<-z.score(QA.v.z.NOTNA,"pitch.ERB")
+r<-cor(QA.v.z.NOTNA$pitch.ERB.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+r
+
+qqplot(QA.v.z.NOTNA$pitch.ERB.zscore,
+       QA.v.z.NOTNA$pitch.Hz.zscore)
+abline(lm(QA.v.z.NOTNA$pitch.Hz.zscore~QA.v.z.NOTNA$pitch.ERB.zscore),col="red")
+
+r<-cor(QA.v.z.NOTNA$pitch.ERB.zscore,
+       QA.v.z.NOTNA$ST.zscore)
+r
 
 ###############
 # Check to see whether normalization by z-score transformation correlates at all with the (automatically selected) pitch ranges used for pitch extraction, which are themselves calculated from speaker range.
@@ -381,9 +451,9 @@ qqplot(range.norm.Hz,
        QA.v.z.NOTNA$pitch.Hz.zscore)
 abline(lm(QA.v.z.NOTNA$pitch.Hz.zscore~range.norm.Hz),col="red")
 
-n = length(range.norm.Hz)
-t = (r/sqrt(1-r^2))*sqrt(n-2)
-2*pt(-abs(t),df=n-1) # Significant correlation...
+# n = length(range.norm.Hz)
+# t = (r/sqrt(1-r^2))*sqrt(n-2)
+# 2*pt(-abs(t),df=n-1) # Significant correlation...
 
 # These are VERY well correlated (r = 0.99), even at the extremes.
 # This makes me feel like different normalization methods depending on different kinds of underlying parameters are unlikely to have a big effect on the data.
@@ -393,7 +463,8 @@ r<-cor(range.norm.Hz,
        QA.v.z.NOTNA$pitch.Hz)
 r
 
-rm(range.norm.Hz,n,t,r)
+# rm(range.norm.Hz,n,t,r)
+rm(range.norm.Hz)
 
 ############
 # Now do it in semitones
@@ -607,12 +678,12 @@ summary(QA.v.z$position)
 ##################
 # Recode discourse and position factors for clarity.
 
-QA.v.z$disc.fnc<-revalue(QA.v.z$disc.fnc,
+QA.v.z$disc.fnc<-revalue(as.factor(QA.v.z$disc.fnc),
                          c("f"="Focused","g"="Given")) # Plain English titles
 QA.v.z$disc.fnc<-relevel(QA.v.z$disc.fnc,
                          "Given") # Make "Given" the first factor level
 
-QA.v.z$position<-revalue(QA.v.z$position,
+QA.v.z$position<-revalue(as.factor(QA.v.z$position),
                          c("l"="Final","m"="Medial")) # Plain English titles
 QA.v.z$position<-relevel(QA.v.z$position,
                          "Medial") # Make "Medial" the first factor level
@@ -1316,7 +1387,8 @@ accent.means<-ddply(mean.clean,
                     .(speaker,accent,tone,stress,Age,Gender,Born,Lives,vlen),
                     summarize,
                     mean_pitch = mean(mean.pitch.Hz),
-                    sd_pitch = sd(mean.pitch.Hz)
+                    sd_pitch = sd(mean.pitch.Hz),
+                    n = length(mean.pitch.Hz)
 )
 
 
@@ -1393,7 +1465,8 @@ pitch.means.str.plot.sig<-ggplot(pitch.means.str, aes(x=tone, y=mean_pitch)) +
   ylab("Mean pitch (Hz)")+
   facet_grid(.~vlen)+
   labs(color = "",lty="")+
-  scale_color_manual(values=c(lightBlue,"grey",orng))
+  # scale_color_manual(values=c(lightBlue,"grey",orng))
+  scale_color_manual(values=c("black","grey50"))
 
 
 pitch.means.str.plot.sig
@@ -1442,7 +1515,7 @@ dev.off()
 
 ###################################
 # Make sure that you're happy with the levels of 'item'
-summary(mean.clean$targ.wd)
+summary(as.factor(mean.clean$targ.wd))
 length(unique(mean.clean$targ.wd))
 
 mean.clean$targ.wd<-revalue(mean.clean$targ.wd,
@@ -1461,7 +1534,7 @@ mean.clean$targ.wd<-revalue(mean.clean$targ.wd,
                                 ))
 
 
-summary(mean.clean$targ.wd)
+summary(as.factor(mean.clean$targ.wd))
 length(unique(mean.clean$targ.wd))
 
 # You can't estimate item-level random effects for items that only occur once in the data.
@@ -1486,6 +1559,8 @@ mean.clean.vv<-droplevels(mean.clean.vv)
 # Packages
 library(lme4)
 library(lmerTest)
+library(emmeans) # For exploring contribution of factors in final models
+                 # https://cran.r-project.org/web/packages/emmeans/vignettes/basics.html
 # detach(package:lmerTest)
 source(paste0(scriptDir,"lmer_collinearity_tools.R")) # For assessing model collinearity
 library(piecewiseSEM) # For computing marginal r^2; https://github.com/jslefche/piecewiseSEM
@@ -1530,32 +1605,32 @@ kappa.mer(full.m) # Large collinearity
 
 # Model
 summary(full.m)
-anova(full.m)
+anova(refit=F,full.m)
 
 # Model reduction
-anova(full.m)[order(anova(full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,full.m)[order(anova(refit=F,full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 coef(summary(full.m))[order(abs(coef(summary(full.m))[,1]),decreasing=T),]
 
 m2<-update(full.m,.~.-tone:position:disc.fnc)
-anova(full.m,m2)
-anova(m2)[order(anova(m2)[5]),]
+anova(refit=F,full.m,m2)
+anova(refit=F,m2)[order(anova(refit=F,m2)[5]),]
 
 m3<-update(m2,.~.-position:disc.fnc:stress)
-anova(full.m,m2,m3)
-anova(m3)[order(anova(m3)[5]),]
+anova(refit=F,full.m,m2,m3)
+anova(refit=F,m3)[order(anova(refit=F,m3)[5]),]
 
 m4<-update(m3,.~.-tone:disc.fnc)
-anova(full.m,m2,m3,m4)
-anova(m4)[order(anova(m4)[5]),]
+anova(refit=F,full.m,m2,m3,m4)
+anova(refit=F,m4)[order(anova(refit=F,m4)[5]),]
 
 m5<-update(m4,.~.-position:stress)
-anova(full.m,m2,m3,m4,m5)
-anova(m5)[order(anova(m5)[5]),]
+anova(refit=F,full.m,m2,m3,m4,m5)
+anova(refit=F,m5)[order(anova(refit=F,m5)[5]),]
 
 # m6<-update(m5,.~.-tone:position) # Sig.
 m6<-update(m5,.~.-position:disc.fnc) # Sig.
-anova(full.m,m2,m3,m4,m5,m6)
-anova(m5)[order(anova(m5)[5]),]
+anova(refit=F,full.m,m2,m3,m4,m5,m6)
+anova(refit=F,m5)[order(anova(refit=F,m5)[5]),]
 
 
 final.m <- m5
@@ -1566,13 +1641,16 @@ kappa.mer(final.m) # Moderate collinearity
 
 # Model
 summary(final.m)
-anova(final.m)
+anova(refit=F,final.m)
 
-anova(final.m)[order(anova(final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 options(scipen=999)
 coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
 options(scipen=0)
 
+
+# Check estimates of interest.
+emmeans(final.m,"tone")
 
 # Check r2
 rsquared(final.m)
@@ -1595,7 +1673,7 @@ ggplot(data=data.frame("resid"=residuals(final.m)))+
 
 full.m<-lmer(data=mean.clean.str,
              # Use REML=F for log-likelihood comparison in step-down model reduction.
-             # If you use lmerTest for doing step-down model reduction, you want to use REML=T:
+             # If you use lmerTest for doing step-down model reduction, consider using REML=T:
              # https://link.springer.com/article/10.3758/s13428-016-0809-y
              REML=F,
              #
@@ -1628,10 +1706,10 @@ kappa.mer(full.m) # Large collinearity
 
 # Model
 summary(full.m)
-anova(full.m)
+anova(refit=F,full.m)
 
 # Model reduction
-anova(full.m)[order(anova(full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,full.m)[order(anova(refit=F,full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 coef(summary(full.m))[order(abs(coef(summary(full.m))[,1]),decreasing=T),]
 
 # If you want to do this semi-automatically, use the lmerTest drop1() function. Pretty handy!
@@ -1639,48 +1717,59 @@ drop1(full.m)
 drop1(full.m)[order(drop1(full.m)[6]),]
 
 m1<-update(full.m,.~.-position:disc.fnc:vlen)
-anova(full.m,m1)
-anova(m1)[order(anova(m1)[5]),]
+anova(refit=F,full.m,m1)
+drop1(m1)
+anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
 
 m2<-update(m1,.~.-tone:disc.fnc:vlen)
-anova(full.m,m1,m2)
-anova(m1)[order(anova(m1)[5]),]
+anova(refit=F,full.m,m1,m2)
+drop1(m2)
+anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
 
 m3<-update(m2,.~.-tone:position:disc.fnc)
-anova(full.m,m1,m2,m3)
-anova(m3)[order(anova(m3)[5]),]
+anova(refit=F,full.m,m1,m2,m3)
+drop1(m3)
+anova(refit=F,m3)[order(anova(refit=F,m3)[5]),]
 
 m4<-update(m3,.~.-tone:position:vlen)
-anova(full.m,m1,m2,m3,m4)
-anova(m4)[order(anova(m4)[5]),]
+anova(refit=F,full.m,m1,m2,m3,m4)
+drop1(m4)
+anova(refit=F,m4)[order(anova(refit=F,m4)[5]),]
 
 m5<-update(m4,.~.-tone:vlen)
-anova(full.m,m1,m2,m3,m4,m5)
-anova(m5)[order(anova(m5)[5]),]
+anova(refit=F,full.m,m1,m2,m3,m4,m5)
+drop1(m5)
+anova(refit=F,m5)[order(anova(refit=F,m5)[5]),]
 
 m6<-update(m5,.~.-tone:disc.fnc)
-anova(full.m,m1,m2,m3,m4,m5,m6)
-anova(m6)[order(anova(m6)[5]),]
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6)
+drop1(m6)
+anova(refit=F,m6)[order(anova(refit=F,m6)[5]),]
 
-m7<-update(m6,.~.-disc.fnc:vlen)
-anova(full.m,m1,m2,m3,m4,m5,m6,m7)
-anova(m7)[order(anova(m7)[5]),]
+m7<-update(m6,.~.-tone:position)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7)
+drop1(m7)
+anova(refit=F,m7)[order(anova(refit=F,m7)[5]),]
 
-m8<-update(m7,.~.-tone:position)
-anova(full.m,m1,m2,m3,m4,m5,m6,m7,m8)
-anova(m8)[order(anova(m8)[5]),]
+m8<-update(m7,.~.-disc.fnc:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8)
+drop1(m8)
+anova(refit=F,m8)[order(anova(refit=F,m8)[5]),]
 
 m9<-update(m8,.~.-vheight)
-anova(full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9) # Sig. at p < 0.1
-anova(m9)[order(anova(m9)[5]),]
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9)
+drop1(m9)
+anova(refit=F,m9)[order(anova(refit=F,m9)[5]),]
 
-m10<-update(m9,.~.-position:vlen) # Sig. at p < 0.1
-anova(full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
-anova(m10)[order(anova(m10)[5]),]
+m10<-update(m9,.~.-position:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
+drop1(m10)
+anova(refit=F,m10)[order(anova(refit=F,m10)[5]),]
 
-m11<-update(m10,.~.-vlen) # Sig.
-anova(full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
-anova(m11)[order(anova(m11)[5]),]
+m11<-update(m10,.~.-vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
+drop1(m11)
+anova(refit=F,m11)[order(anova(refit=F,m11)[5]),]
 
 final.m<-m11
 
@@ -1690,13 +1779,17 @@ kappa.mer(final.m) # Moderate collinearity
 
 # Model
 summary(final.m)
-anova(final.m)
+anova(refit=F,final.m)
 
-anova(final.m)[order(anova(final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 options(scipen=999)
 coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
 options(scipen=0)
 
+# Check estimates of interest.
+emmeans(final.m,"tone")
+emmeans(final.m,"position")
+emmeans(final.m,"disc.fnc")
 
 # Check r2
 rsquared(final.m)
@@ -1711,6 +1804,149 @@ summary(residuals(final.m))
 ggplot(data=data.frame("resid"=residuals(final.m)))+
   geom_density(aes(x=resid),fill="darkgrey",alpha=0.75)+
   theme_bw(base_size = 48)
+
+
+#############
+# Just to be thorough, we fit a model for log(mean Hz) too. The results are basically the same.
+full.m<-lmer(data=mean.clean.str,
+             # Use REML=F for log-likelihood comparison in step-down model reduction.
+             # If you use lmerTest for doing step-down model reduction, you want to use REML=T:
+             # https://link.springer.com/article/10.3758/s13428-016-0809-y
+             REML=F,
+             #
+             # Increase the number of iterations to convergence.
+             # https://stat.ethz.ch/pipermail/r-sig-mixed-models/2014q2/022084.html
+             control=lmerControl(optCtrl=list(maxfun=1e5),optimizer = "bobyqa"),
+             #
+             # Dependent variable:
+             log(mean.pitch.Hz)~
+               #
+               # Fixed effects: all required by theoretical interest, and allowed by convergence/factor crossing
+               tone*position*disc.fnc+
+               vlen*tone*position+
+               vlen*tone*disc.fnc+
+               vlen*disc.fnc*position+
+               vheight+
+               # Random effects
+               # Simple random intercepts
+               (1|targ.wd)+
+               (1|speaker)
+             # By speaker random slopes for tone/stress, correlated with by-speaker random intercepts
+             # The model fails to converge when these are included -- probably not enough per-speaker data.
+             # (1+tone|speaker)
+)
+
+
+# Collinearity
+max(vif.mer(full.m))
+kappa.mer(full.m) # Large collinearity
+
+# Model
+summary(full.m)
+anova(refit=F,full.m)
+
+# Model reduction
+anova(refit=F,full.m)[order(anova(refit=F,full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+coef(summary(full.m))[order(abs(coef(summary(full.m))[,1]),decreasing=T),]
+
+# If you want to do this semi-automatically, use the lmerTest drop1() function. Pretty handy!
+drop1(full.m)
+drop1(full.m)[order(drop1(full.m)[6]),]
+
+m1<-update(full.m,.~.-position:disc.fnc:vlen)
+anova(refit=F,full.m,m1)
+
+anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
+drop1(m1)[order(drop1(m1)[6]),]
+m2<-update(m1,.~.-tone:disc.fnc:vlen)
+anova(refit=F,full.m,m1,m2)
+
+anova(refit=F,m2)[order(anova(refit=F,m2)[5]),]
+drop1(m2)[order(drop1(m2)[6]),]
+m3<-update(m2,.~.-tone:position:disc.fnc)
+anova(refit=F,full.m,m1,m2,m3)
+
+anova(refit=F,m3)[order(anova(refit=F,m3)[5]),]
+drop1(m3)[order(drop1(m3)[6]),]
+m4<-update(m3,.~.-tone:position:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4)
+
+anova(refit=F,m4)[order(anova(refit=F,m4)[5]),]
+drop1(m4)[order(drop1(m4)[6]),]
+m5<-update(m4,.~.-tone:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5)
+
+anova(refit=F,m5)[order(anova(refit=F,m5)[5]),]
+drop1(m5)[order(drop1(m5)[6]),]
+m6<-update(m5,.~.-tone:position)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6)
+
+anova(refit=F,m6)[order(anova(refit=F,m6)[5]),]
+drop1(m6)[order(drop1(m6)[6]),]
+m7<-update(m6,.~.-tone:disc.fnc)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7)
+
+anova(refit=F,m7)[order(anova(refit=F,m7)[5]),]
+drop1(m7)[order(drop1(m7)[6]),]
+m8<-update(m7,.~.-position:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8)
+
+anova(refit=F,m8)[order(anova(refit=F,m8)[5]),]
+drop1(m8)[order(drop1(m8)[6]),]
+m9<-update(m8,.~.-disc.fnc:vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9)
+
+anova(refit=F,m9)[order(anova(refit=F,m9)[5]),]
+drop1(m9)[order(drop1(m9)[6]),]
+m10<-update(m9,.~.-vlen)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
+
+anova(refit=F,m10)[order(anova(refit=F,m10)[5]),]
+drop1(m10)[order(drop1(m10)[6]),]
+m11<-update(m10,.~.-vheight)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11)
+
+anova(refit=F,m11)[order(anova(refit=F,m11)[5]),]
+drop1(m11)[order(drop1(m11)[6]),]
+m12<-update(m11,.~.-position:disc.fnc)
+anova(refit=F,full.m,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12)
+
+final.m<-m11
+
+# Collinearity
+max(vif.mer(final.m))
+kappa.mer(final.m) # Moderate collinearity
+
+# Model
+summary(final.m)
+anova(refit=F,final.m)
+
+# To get estimated effect sizes in original units (e.g. Hz), you back-transform like thus:
+# e^(intercept + tone)-e^(intercept) = e^(5.153116+0.056067)-e^(5.153116) = about 10Hz
+
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+options(scipen=999)
+coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
+options(scipen=0)
+
+e = 2.71828
+intercept = coef(summary(final.m))[,1][1]
+e^(intercept+coef(summary(final.m))[,1])-e^(intercept) # Get effect sizes in original units
+
+# Check r2
+rsquared(final.m)
+
+# Check normality of residuals --- not too bad!
+cor(qqnorm(residuals(final.m))$x,
+    residuals(final.m))
+qqnorm(residuals(final.m)) # Not ideal, but not too bad.
+qqline(residuals(final.m))
+
+summary(residuals(final.m))
+ggplot(data=data.frame("resid"=residuals(final.m)))+
+  geom_density(aes(x=resid),fill="darkgrey",alpha=0.75)+
+  theme_bw(base_size = 48)
+
 
 
 
@@ -1756,31 +1992,31 @@ kappa.mer(full.m)
 
 # Model
 summary(full.m)
-anova(full.m)
+anova(refit=F,full.m)
 
 drop1(full.m)[order(drop1(full.m)[6]),]
 m1<-update(full.m,.~.-tone:vlen)
-anova(full.m,m1)
+anova(refit=F,full.m,m1)
 
-anova(m1)[order(anova(m1)[5]),]
+anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
 drop1(m1)[order(drop1(m1)[6]),]
 m2<-update(m1,.~.-stress)
-anova(full.m,m1,m2)
+anova(refit=F,full.m,m1,m2)
 
-anova(m2)[order(anova(m2)[5]),]
+anova(refit=F,m2)[order(anova(refit=F,m2)[5]),]
 drop1(m2)[order(drop1(m2)[6]),]
 m3<-update(m2,.~.-vheight)
-anova(full.m,m1,m2,m3)
+anova(refit=F,full.m,m1,m2,m3)
 
-anova(m3)[order(anova(m3)[5]),]
+anova(refit=F,m3)[order(anova(refit=F,m3)[5]),]
 drop1(m3)[order(drop1(m3)[6]),]
 m4<-update(m3,.~.-vlen) # Sig. at p < .1
-anova(full.m,m1,m2,m3,m4)
+anova(refit=F,full.m,m1,m2,m3,m4)
 
-anova(m4)[order(anova(m4)[5]),]
+anova(refit=F,m4)[order(anova(refit=F,m4)[5]),]
 drop1(m4)[order(drop1(m4)[6]),]
 m5<-update(m4,.~.-start.time) # Sig. at p < .05
-anova(full.m,m1,m2,m3,m4,m5)
+anova(refit=F,full.m,m1,m2,m3,m4,m5)
 
 final.m<-m4
 
@@ -1790,9 +2026,9 @@ kappa.mer(final.m) # Low collinearity
 
 # Model
 summary(final.m)
-anova(final.m)
+anova(refit=F,final.m)
 
-anova(final.m)[order(anova(final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 options(scipen=999)
 coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
 options(scipen=0)
@@ -1898,9 +2134,10 @@ V.plot<-ggplot(currdata,
   
   geom_smooth(method="loess",lwd=3)+
   
-  scale_color_manual(values=cbPalette
-                     #,guide = "none"
-                     )+
+  # scale_color_manual(values=cbPalette
+  #                    #,guide = "none"
+  #                    )+
+  scale_color_grey(start=0,end=0.4)+
   scale_linetype_manual(values=c("solid","dashed","dotted")
                         #,guide = "none"
                         )+
@@ -1973,7 +2210,8 @@ V.plot<-ggplot(currdata,
   
   geom_smooth(method="loess",lwd=3)+
   
-  scale_color_manual(values=cbPalette)+
+#  scale_color_manual(values=cbPalette)+
+  scale_color_grey(start=0,end=0.4)+
   scale_linetype_manual(values=c("solid","dashed","dotted"))+
   
   theme_bw()+
@@ -2023,7 +2261,6 @@ dev.off()
 
 
 
-
 ##################
 # Plot sequential pitch tracks
 ##################
@@ -2052,7 +2289,8 @@ seq.track.plot<-function(df){
     
     geom_smooth(method="loess",lwd=6)+
     
-    scale_color_manual(values=cbPalette)+
+    # scale_color_manual(values=cbPalette)+
+    scale_color_grey(start=0,end=0.5)+
     scale_linetype_manual(values=c("solid","dashed","dotted"))+
     
     theme_bw()+
@@ -2086,10 +2324,22 @@ seq.track.plot<-function(df){
 
 output_file<-paste0(imageDir,"Sequential_tracks/sequential_f0_tracks_pooled.pdf")
 cairo_pdf(file=output_file,
-          width=16,height=10)
+          width=16,height=8)
   seq.track.plot(plotdata)+coord_cartesian(ylim=c(-1,1))
 dev.off()
 
+
+output_file<-paste0(imageDir,"Sequential_tracks/sequential_f0_tracks_pooled_short.pdf")
+cairo_pdf(file=output_file,
+          width=12,height=6)
+  seq.track.plot(subset(plotdata,vlen=="V"))+coord_cartesian(ylim=c(-1,1))
+dev.off()
+
+output_file<-paste0(imageDir,"Sequential_tracks/sequential_f0_tracks_pooled_long.pdf")
+cairo_pdf(file=output_file,
+          width=12,height=6)
+  seq.track.plot(subset(plotdata,vlen=="V\u2D0"))+coord_cartesian(ylim=c(-1,1))
+dev.off()
 
 output_file<-paste0(imageDir,"Sequential_tracks/sequential_f0_tracks_focused.pdf")
 cairo_pdf(file=output_file,
@@ -2367,8 +2617,10 @@ summary(PCdeviations$coords)
 pc.mids<-ggplot(data=centers,
                 aes(x=Step,
                     y=Pitch))+
-  geom_point(size=4,color="grey")+
-  geom_line(lwd=2,color="grey")+
+  # geom_point(size=4,color="grey")+
+  # geom_line(lwd=2,color="grey")+
+  geom_point(size=4,color="black")+
+  geom_line(lwd=2,color="black")+
   theme_bw(base_size=24)+
   theme(strip.text = element_text(face = "bold"),
         legend.key.width=unit(4,"line"),
@@ -2399,7 +2651,9 @@ pc.mids<-ggplot(data=centers,
   # theme(legend.position = "none")+
   scale_x_continuous(breaks=seq(2,8,1))+
   facet_grid(.~PC)+
-  scale_color_manual(values=cbPalette[3:length(cbPalette)],name="Direction")
+  # scale_color_manual(values=cbPalette[3:length(cbPalette)],name="Direction")
+  scale_color_manual(values=c("grey30","grey60"),name="Direction")
+  #scale_color_grey(start=0,end=0.6,name="Direction")
 
 pc.mids
 
@@ -2444,6 +2698,7 @@ head(v.PCA.long)
 toImpute<-subset(plyr::count(na.omit(v.PCA.long)$vowel.code),freq<9)
 toImpute
 nrow(toImpute)
+nrow(toImpute)/nrow(plyr::count(na.omit(v.PCA.long)$vowel.code)) # Get proportion.
 
 
 
@@ -2470,7 +2725,7 @@ for (vtoken in unique(v.PCA.long$vowel.code)){
     # https://cran.r-project.org/web/packages/imputeTS/readme/README.html
     
     vtoken.imputed<-na_interpolation(vtoken.pitch,
-                                     option="stine") # You're using stine because its more conservative than spline,
+                                     option="stine") # You're using stine because it's more conservative than spline,
                                                      # and generates fewer 'wobbly' interpolations at edges.
                                                      # But this mostly produces linear interpolations anyway.
                                                      # na_mean (mean replacement) and na_ma (moving average)
@@ -2487,21 +2742,21 @@ nrow(v.PCA.long)
 
 # Visualize imputations
 # This isn't that useful as currently implemented because it only operates on single contours.
-impdata<-subset(v.PCA.long,vowel.code=="S13-83.19")
-plotNA.gapsize(impdata$pitch.Hz.zscore)
-plotNA.imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
-
-impdata<-subset(v.PCA.long,vowel.code=="S11-75.18")
-plotNA.imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
-
-impdata<-subset(v.PCA.long,vowel.code=="S13-23.18")
-plotNA.imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
-
-impdata<-subset(v.PCA.long,vowel.code=="S04-26.18")
-plotNA.imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
-
-impdata<-subset(v.PCA.long,vowel.code=="S01-40.15")
-plotNA.imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
+# impdata<-subset(v.PCA.long,vowel.code=="S13-83.19")
+# ggplot_na_gapsize(impdata$pitch.Hz.zscore)
+# ggplot_na_imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
+# 
+# #impdata<-subset(v.PCA.long,vowel.code=="S11-75.18")
+# #ggplot_na_imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
+# 
+# impdata<-subset(v.PCA.long,vowel.code=="S13-23.18")
+# ggplot_na_imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
+# 
+# impdata<-subset(v.PCA.long,vowel.code=="S04-26.18")
+# ggplot_na_imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
+# 
+# impdata<-subset(v.PCA.long,vowel.code=="S01-40.15")
+# ggplot_na_imputations(impdata$pitch.Hz.zscore,impdata$pitch.Hz.z.imputed)
 
 # Remove all-NA rows
 v.PCA.long<-subset(v.PCA.long,!(vowel.code%in%bad.tokens))
@@ -2654,8 +2909,10 @@ summary(PCdeviations$coords)
 pc.imputed<-ggplot(data=centers,
                    aes(x=Step,
                        y=Pitch))+
-  geom_point(size=4,color="grey")+
-  geom_line(lwd=2,color="grey")+
+  # geom_point(size=4,color="grey")+
+  # geom_line(lwd=2,color="grey")+
+  geom_point(size=4,color="black")+
+  geom_line(lwd=2,color="black")+
   theme_bw(base_size=42)+
   theme(strip.text = element_text(face = "bold",size=32),
         legend.key.width=unit(4,"line"),
@@ -2663,7 +2920,7 @@ pc.imputed<-ggplot(data=centers,
         legend.title = element_text(face = "bold",size=32))+
   geom_label(inherit.aes = F,
              data=pcframe,
-             aes(x=7.5,y=1.15,
+             aes(x=8,y=1.1,
                  label=Var.Exp),
              size=10)+
   #ggtitle("Dimensions of variation of each PC")+
@@ -2688,13 +2945,14 @@ pc.imputed<-ggplot(data=centers,
   theme(legend.position = "none")+
   scale_x_continuous(breaks=seq(1,9,1))+
   facet_grid(.~PC)+
-  scale_color_manual(values=cbPalette[3:length(cbPalette)],name="Direction")
+  # scale_color_manual(values=cbPalette[3:length(cbPalette)],name="Direction")
+  scale_color_manual(values=c("grey25","grey50"),name="Direction")
 
 pc.imputed
 
 output_file<-paste0(imageDir,"PCA/PCA_deviations_imputation_stineman.pdf")
 cairo_pdf(file=output_file,
-          width=16,height=6)
+          width=16,height=7)
   pc.imputed
 dev.off()
 
@@ -3055,7 +3313,7 @@ elbow.plot<-qplot(data=variance.frame,
   )+
   geom_line()+
   scale_x_continuous(breaks=seq(1,maxgroups,1))+
-  scale_y_continuous(breaks=seq(0,1,0.1),labels=scales::percent)+
+  scale_y_continuous(breaks=seq(0,1,0.1),labels=scales::percent_format(accuracy=1))+
   ylab("Variance")+
   xlab("Groups")+
   theme_bw(base_size=32)
@@ -3125,6 +3383,10 @@ k5<-kmeans(form.kmeans,centers=5)
 
 optimal.k<-k4
 
+# Save this run of the kmeans for future use.
+# save(optimal.k,file=paste0(datadir,"kmeansoutput.Rda"))
+load(paste0(datadir,"kmeansoutput.Rda"))
+
 optimal.k$centers
 optimal.k$size
 
@@ -3168,8 +3430,8 @@ ggplot(data=v.PCA.unique,aes(fill=kgroup,x=kgroup))+
 # Plot contours by group assignments
 
 # Revalue group names if you'd like 
-v.PCA.imputed.long$kgroup<-revalue(v.PCA.imputed.long$kgroup,c("4"="Rise","3"="Flat","1"="Slight fall", "2"="Fall"))
-v.PCA.unique$kgroup<-revalue(v.PCA.unique$kgroup,c("4"="Rise","3"="Flat","1"="Slight fall", "2"="Fall"))
+v.PCA.imputed.long$kgroup<-revalue(v.PCA.imputed.long$kgroup,c("4"="Rise","1"="Flat","2"="Slight fall", "3"="Fall"))
+v.PCA.unique$kgroup<-revalue(v.PCA.unique$kgroup,c("4"="Rise","1"="Flat","2"="Slight fall", "3"="Fall"))
 
 v.PCA.imputed.long$kgroup<-factor(v.PCA.imputed.long$kgroup,
                         levels=c("Flat","Rise","Slight fall","Fall"))
@@ -3198,18 +3460,22 @@ kmeans.contour.plot<-ggplot(data=v.PCA.imputed.long,
   #           inherit.aes=F,
   #           lwd=3,color=lightBlue,alpha=0.5)+
   
-  geom_smooth(aes(group=kgroup),method="loess",lwd=3)+
-  
-  scale_color_manual(values=cbBW
+  geom_smooth(aes(group=kgroup),method="loess",lwd=4)+
+
+  scale_color_grey(start=0,end=0.45
                      #,guide = "none"
-  )+
+  )+  
+  # scale_color_manual(values=cbBW
+  #                    #,guide = "none"
+  # )+
   scale_linetype_manual(values=c("solid","dashed","dotted","dotdash","twodash")
                         #,guide = "none"
   )+
   
   theme_bw(base_size = 48)+
   theme(text=element_text(size=42),
-        legend.key.width=unit(10,"line"),
+        legend.key.width=unit(16,"line"),
+        legend.key.height=unit(4,"line"),
         plot.title = element_text(size = 32)
         #axis.title = element_text(size=32)
         
@@ -3229,20 +3495,21 @@ kmeans.contour.plot<-ggplot(data=v.PCA.imputed.long,
 
 kmeans.contour.plot
 
-# 
-# output_file<-paste0(imageDir,"PCA/PCA_kmeans_contours.pdf")
-# cairo_pdf(file=output_file,
-#           width=16,height=10)
-#   kmeans.contour.plot
-# dev.off()
-# 
+
+output_file<-paste0(imageDir,"PCA/PCA_kmeans_contours.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  kmeans.contour.plot
+dev.off()
+
 
 # Counts
 # https://sebastiansauer.github.io/percentage_plot_ggplot2_V2/
 kmeans.contour.barplots<-ggplot(data=v.PCA.unique,aes(fill=kgroup,x=kgroup,group=accent),color="black")+
   # geom_bar(alpha=0.75)+
   geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count",alpha=0.75) + 
-  scale_fill_manual(values=cbBW,guide=F)+
+  #scale_fill_manual(values=cbBW,guide=F)+
+  scale_fill_grey(start=0,end=0.45,guide=F)+
   theme_bw(base_size = 42)+
   theme(text=element_text(size=42),
         legend.key.width=unit(8,"line"),
@@ -3265,12 +3532,12 @@ kmeans.contour.barplots<-ggplot(data=v.PCA.unique,aes(fill=kgroup,x=kgroup,group
 
 kmeans.contour.barplots
 
-# output_file<-paste0(imageDir,"PCA/PCA_kmeans_group_counts.pdf")
-# cairo_pdf(file=output_file,
-#           width=16,height=10)
-#   kmeans.contour.barplots
-# dev.off()
-# 
+output_file<-paste0(imageDir,"PCA/PCA_kmeans_group_counts.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  kmeans.contour.barplots
+dev.off()
+
 
 
 #######    
@@ -3312,11 +3579,246 @@ summary(v.PCA.unique$targ.wd)
 # brm.m<-brm(data=v.PCA.unique,
 #     formula=kgroup~accent*vlen+(1|speaker)+(1|targ.wd),
 #     family = categorical())
-# 
-# brm.m
+
+# Save this run of the kmeans for future use.
+# save(brm.m,file=paste0(datadir,"multinomialoutput.Rda"))
+load(paste0(datadir,"multinomialoutput.Rda"))
+
+brm.m
 
 
 
+
+
+####################################
+# Plot distributions of locations for f0 minima and maxima
+####################################
+# To get the data *before* outlier trimming, we could use QA.v, then use a lookup + matching method 
+# to add all the factors we need.
+# But outlier trimming is unlikely to affect the data here.
+MinMaxLoc<-dplyr::select(QA.v.z,-c("pitch.Hz","pitch.ERB","mean.pitch.Hz","mean.pitch.ERB","pitch.Hz.zscore"))
+MinMaxLoc<-pivot_wider(MinMaxLoc,names_from=step,names_prefix="DROP",values_from=max.pitch.ERB)
+MinMaxLoc <- MinMaxLoc %>% dplyr::select(-starts_with("DROP"))
+
+# Plot
+MinMaxLoc.v<-subset(MinMaxLoc,vlen=="V" & stress=="Stressed")
+MinMaxLoc.vv<-subset(MinMaxLoc,vlen=="V\u2D0" & stress=="Stressed")
+
+
+# As percentage of V duration
+maxloc.barplots.v<-ggplot(data=MinMaxLoc.v,aes(x=max.pitch.loc.perc))+
+  geom_histogram(binwidth=0.1,na.rm=T,alpha=0.8,aes(y=..count../sum(..count..))) + 
+  theme_bw(base_size = 42)+
+  theme(text=element_text(size=42),
+        legend.key.width=unit(8,"line"),
+        strip.text = element_text(face = "bold",family = "Doulos SIL",size=44),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        axis.text=element_text(size=24)
+        # axis.title.x = element_blank(),
+        # axis.title.y = element_blank()
+  )+
+  theme(strip.text.y = element_text(angle=0))+
+  facet_grid(position~disc.fnc+accent)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),limits=c(0,0.05))+
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1))+
+  xlab("Position of f0 maximum in % of total vowel duration")+
+  ylab("Proportion of all data")+
+  ggtitle("f0 maximum location for stressed short vowels")
+
+maxloc.barplots.v
+
+output_file<-paste0(imageDir,"Extrema_positions/maxloc_v_perc.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  maxloc.barplots.v
+dev.off()
+
+
+maxloc.barplots.vv<-ggplot(data=MinMaxLoc.vv,aes(x=max.pitch.loc.perc))+
+  geom_histogram(binwidth=0.1,na.rm=T,alpha=0.8,aes(y=..count../sum(..count..))) + 
+  theme_bw(base_size = 42)+
+  theme(text=element_text(size=42),
+        legend.key.width=unit(8,"line"),
+        strip.text = element_text(face = "bold",family = "Doulos SIL",size=44),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        axis.text=element_text(size=24)
+        #axis.title.y = element_blank(),
+        #axis.title.x = element_blank()
+  )+
+  theme(strip.text.y = element_text(angle=0))+
+  facet_grid(position~disc.fnc+accent)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),limits=c(0,0.05))+
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1))+
+  xlab("Position of f0 maximum in % of total vowel duration")+
+  ylab("Proportion of all data")+
+  ggtitle("f0 maximum location for stressed long vowels")
+
+maxloc.barplots.vv
+
+output_file<-paste0(imageDir,"Extrema_positions/maxloc_vv_perc.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  maxloc.barplots.vv
+dev.off()
+
+
+# In raw ms
+maxloc.barplots.v<-ggplot(data=MinMaxLoc.v,aes(x=max.pitch.loc))+
+  geom_histogram(binwidth=10,na.rm=T,alpha=0.8,aes(y=..count../sum(..count..))) + 
+  theme_bw(base_size = 42)+
+  theme(text=element_text(size=42),
+        legend.key.width=unit(8,"line"),
+        strip.text = element_text(face = "bold",family = "Doulos SIL",size=44),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        axis.text=element_text(size=24)
+        # axis.title.x = element_blank(),
+        # axis.title.y = element_blank()
+  )+
+  theme(strip.text.y = element_text(angle=0))+
+  facet_grid(position~disc.fnc+accent)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),limits=c(0,0.05))+
+  xlab("Position of f0 maximum in ms relative to vowel onset")+
+  ylab("Proportion of all data")+
+  ggtitle("f0 maximum location for stressed short vowels")
+
+maxloc.barplots.v
+
+output_file<-paste0(imageDir,"Extrema_positions/maxloc_v_raw.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  maxloc.barplots.v
+dev.off()
+
+maxloc.barplots.vv<-ggplot(data=MinMaxLoc.vv,aes(x=max.pitch.loc))+
+  geom_histogram(binwidth=10,na.rm=T,alpha=0.8,aes(y=..count../sum(..count..))) + 
+  theme_bw(base_size = 42)+
+  theme(text=element_text(size=42),
+        legend.key.width=unit(8,"line"),
+        strip.text = element_text(face = "bold",family = "Doulos SIL",size=44),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        axis.text=element_text(size=24)
+        # axis.title.x = element_blank(),
+        # axis.title.y = element_blank()
+  )+
+  theme(strip.text.y = element_text(angle=0))+
+  facet_grid(position~disc.fnc+accent)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),limits=c(0,0.05))+
+  xlab("Position of f0 maximum in ms relative to vowel onset")+
+  ylab("Proportion of all data")+
+  ggtitle("f0 maximum location for stressed long vowels")
+
+maxloc.barplots.vv
+
+output_file<-paste0(imageDir,"Extrema_positions/maxloc_vv_raw.pdf")
+cairo_pdf(file=output_file,
+          width=16,height=10)
+  maxloc.barplots.vv
+dev.off()
+
+
+######
+# Fit an lmer
+full.m<-lmer(data=MinMaxLoc,
+             # Use REML=F for log-likelihood comparison in step-down model reduction.
+             # If you use lmerTest for doing step-down model reduction, you want to use REML=T:
+             # https://link.springer.com/article/10.3758/s13428-016-0809-y
+             REML=F,
+             #
+             # Increase the number of iterations to convergence.
+             # https://stat.ethz.ch/pipermail/r-sig-mixed-models/2014q2/022084.html
+             control=lmerControl(optCtrl=list(maxfun=1e5),optimizer = "bobyqa"),
+             #
+             # Dependent variable:
+             max.pitch.loc.perc~
+               #
+               # Fixed effects: all required by theoretical interest, and allowed by convergence/factor crossing
+               (tone+vlen+position)^3+
+               (disc.fnc+tone)^2+
+               # Random effects
+               # Simple random intercepts
+               (1|targ.wd)+
+               (1|speaker)
+             # By speaker random slopes for tone/stress, correlated with by-speaker random intercepts
+             # The model fails to converge when these are included -- probably not enough per-speaker data.
+             # (1+tone|speaker)
+)
+
+
+# Collinearity
+max(vif.mer(full.m))
+kappa.mer(full.m) # Large collinearity
+
+# Model
+summary(full.m)
+anova(refit=F,full.m)
+
+# Model reduction
+anova(refit=F,full.m)[order(anova(refit=F,full.m)[5]),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+coef(summary(full.m))[order(abs(coef(summary(full.m))[,1]),decreasing=T),]
+
+# If you want to do this semi-automatically, use the lmerTest drop1() function. Pretty handy!
+drop1(full.m)
+drop1(full.m)[order(drop1(full.m)[6]),]
+
+m1<-update(full.m,.~.-tone:vlen:position)
+anova(refit=F,full.m,m1)
+
+anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
+drop1(m1)[order(drop1(m1)[6]),]
+m2<-update(m1,.~.-position:vlen)
+anova(refit=F,full.m,m1,m2)
+
+anova(refit=F,m2)[order(anova(refit=F,m2)[5]),]
+drop1(m2)[order(drop1(m2)[6]),]
+m3<-update(m2,.~.-tone:position)
+anova(refit=F,full.m,m1,m2,m3)
+
+anova(refit=F,m3)[order(anova(refit=F,m3)[5]),]
+drop1(m3)[order(drop1(m3)[6]),]
+m4<-update(m3,.~.-tone:disc.fnc)
+anova(refit=F,full.m,m1,m2,m3,m4)
+
+anova(refit=F,m4)[order(anova(refit=F,m4)[5]),]
+drop1(m4)[order(drop1(m4)[6]),]
+m5<-update(m4,.~.-position)
+anova(refit=F,full.m,m1,m2,m3,m4,m5)
+
+final.m<-m4
+
+# Collinearity
+max(vif.mer(final.m))
+kappa.mer(final.m) # Moderate collinearity
+
+# Model
+summary(final.m)
+anova(refit=F,final.m)
+
+# To get estimated effect sizes in original units (e.g. Hz), you back-transform like thus:
+# e^(intercept + tone)-e^(intercept) = e^(5.153116+0.056067)-e^(5.153116) = about 10Hz
+
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+options(scipen=999)
+coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
+options(scipen=0)
+
+
+# Check r2
+rsquared(final.m)
+
+# Check normality of residuals --- pretty awful!
+cor(qqnorm(residuals(final.m))$x,
+    residuals(final.m))
+qqnorm(residuals(final.m)) # Not ideal, but not too bad.
+qqline(residuals(final.m))
+
+summary(residuals(final.m))
+ggplot(data=data.frame("resid"=residuals(final.m)))+
+  geom_density(aes(x=resid),fill="darkgrey",alpha=0.75)+
+  theme_bw(base_size = 48)
 
 
 
@@ -3332,6 +3834,8 @@ summary(stressed.unique$seg.dur)
 
 stressed.unique$vlen<-revalue(stressed.unique$vlen,c("Short" = "V", "Long" = "V\u2D0"))
 stressed.unique$vlen<-factor(stressed.unique$vlen,levels=c("V","V\u2D0"))
+
+
 
 ###################
 # Get unique segment durations and plot.
@@ -3435,9 +3939,10 @@ dev.off()
 QA.v.unique$vlen<-revalue(QA.v.unique$vlen,c("Short" = "V", "Long" = "V\u2D0"))
 QA.v.unique$vlen<-factor(QA.v.unique$vlen,levels=c("V","V\u2D0"))
 
+
 tone.dur.plot<-ggplot(data=QA.v.unique)+
   geom_density(aes(x=seg.dur,
-                   fill=accent,
+                   #fill=accent,
                    lty=accent),
                alpha=0.3,color="black",lwd=2.5)+
   theme_bw(base_size=42)+
@@ -3448,9 +3953,10 @@ tone.dur.plot<-ggplot(data=QA.v.unique)+
         )+
   xlab("Accented vowel duration (ms)")+
   facet_grid(.~vlen)+
-  scale_fill_manual(values=cbPalette[c(2,1,3)])+
-  ylab("Density")+
+  # scale_fill_manual(values=cbPalette[c(2,1,3)])+
+  scale_fill_grey(start=0.4,end=0.9)+
   labs(fill = "Accent",lty="Accent")+
+  ylab("Density")+
   scale_linetype_manual(values=c("solid","dashed","dotted")
                         #,guide = "none"
   )
@@ -3615,18 +4121,42 @@ rm(short.t,short.p,long.t,long.p,p.frame,tone.dur.plot)
 ############
 # lmer analysis of duration
 
+###################
+# Cut potential outliers from full stressed + unstressed data set
+summary(subset(QA.v.unique,vlen=="V")$seg.dur)
+summary(subset(QA.v.unique,vlen=="V\u2D0")$seg.dur)
+
+quantile(subset(QA.v.unique,vlen=="V")$seg.dur,probs=seq(0,1,0.01))
+quantile(subset(QA.v.unique,vlen=="V\u2D0")$seg.dur,probs=seq(0,1,0.01))
+
+# QA.v.unique.cut<-subset(QA.v.unique,!(vlen=="V" & seg.dur > 150) & !(vlen=="V\u2D0" & seg.dur > 250))
+# 100*(1-nrow(QA.v.unique.cut)/nrow(QA.v.unique))
+QA.v.unique.cut<-QA.v.unique
+
 # We analyze unstressed and stressed vowels
 
 # Add some coding for vowel quality and height
-QA.v.unique$v.qual<-QA.v.unique$segment
-QA.v.unique$v.qual<-gsub(QA.v.unique$v.qual, # Use regular expressions to strip out coding
+QA.v.unique.cut$v.qual<-QA.v.unique.cut$segment
+QA.v.unique.cut$v.qual<-gsub(QA.v.unique.cut$v.qual, # Use regular expressions to strip out coding
                         pattern="T|S|L|1|0",
                         replacement="")
-QA.v.unique$v.qual<-as.factor(QA.v.unique$v.qual)
-summary(QA.v.unique$v.qual)
+QA.v.unique.cut$v.qual<-as.factor(QA.v.unique.cut$v.qual)
+summary(QA.v.unique.cut$v.qual)
+
+QA.v.unique.cut$vheight<-QA.v.unique.cut$v.qual
+QA.v.unique.cut$vheight<-revalue(QA.v.unique.cut$vheight,
+                            c("A"="Low",
+                              "E"="Mid",
+                              "O"="Mid",
+                              "I"="High",
+                              "U"="High"
+                            ))
+summary(QA.v.unique.cut$vheight)
 
 
-full.m<-lmer(data=QA.v.unique,
+
+
+full.m<-lmer(data=QA.v.unique.cut,
              # Use REML=F for log-likelihood comparison in step-down model reduction.
              # If you use lmerTest for doing step-down model reduction, you want to use REML=T:
              # https://link.springer.com/article/10.3758/s13428-016-0809-y
@@ -3641,9 +4171,10 @@ full.m<-lmer(data=QA.v.unique,
                #
                # Fixed effects: all required by theoretical interest, and allowed by convergence/factor crossing
                tone*vlen+
-               stress+
+               stress*disc.fnc+
+               stress*position+
                #v.pos.wd.adj+
-               v.qual+
+               vheight+
                # Random effects
                # Simple random intercepts
                (1|targ.wd)+
@@ -3661,18 +4192,18 @@ kappa.mer(full.m)
 
 # Model
 summary(full.m)
-anova(full.m)
+anova(refit=F,full.m)
 
 drop1(full.m)[order(drop1(full.m)[6]),]
-m1<-update(full.m,.~.-tone:vlen)
-anova(full.m,m1)
- 
-anova(m1)[order(anova(m1)[5]),]
-drop1(m1)[order(drop1(m1)[6]),]
-m2<-update(m1,.~.-tone)
-anova(full.m,m1,m2)
+m1<-update(full.m,.~.-stress:position)
+anova(refit=F,full.m,m1)
+#  
+# anova(refit=F,m1)[order(anova(refit=F,m1)[5]),]
+# drop1(m1)[order(drop1(m1)[6]),]
+# m2<-update(m1,.~.-tone)
+# anova(refit=F,full.m,m1,m2)
 
-final.m<-m1
+final.m<-full.m
 
 # Collinearity
 max(vif.mer(final.m))
@@ -3680,9 +4211,9 @@ kappa.mer(final.m) # Low collinearity
 
 # Model
 summary(final.m)
-anova(final.m)
+anova(refit=F,final.m)
 
-anova(final.m)[order(anova(final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
+anova(refit=F,final.m)[order(anova(refit=F,final.m)[5],decreasing=T),] # Shorthand for sorting anova by F-value (decreasing) (use 4 if lmerTest NOT loaded)
 options(scipen=999)
 coef(summary(final.m))[order(abs(coef(summary(final.m))[,1]),decreasing=T),]
 options(scipen=0)
@@ -3701,3 +4232,21 @@ summary(residuals(final.m))
 ggplot(data=data.frame("resid"=residuals(final.m)))+
   geom_density(aes(x=resid),fill="darkgrey",alpha=0.75)+
   theme_bw(base_size = 48)
+
+
+# Are there any trading relations between f0 and duration?
+tone.unique<-subset(stressed.unique,tone=="Tonal")
+
+attach(tone.unique)
+  cor(mean.pitch.Hz.zscore,seg.dur) # Nope
+detach(tone.unique)
+
+# Mostly, no, and the two significant values go in opposite directions.
+ddply(tone.unique,
+      .(speaker),
+      summarize,
+      r = cor(mean.pitch.Hz.zscore,seg.dur),
+      n = n_distinct(token.code),
+      t = (r/sqrt(1-r^2))*sqrt(n-2),
+      p = 2*pt(-abs(t),df=n-1) # Significant correlation...
+)
