@@ -1,5 +1,5 @@
 # Article details #
-These materials are associated with Bennett, Henderson & Harvey (2021) "Tonal variability and marginal contrast: Lexical pitch accent in Uspanteko"
+These materials are associated with Bennett, Henderson & Harvey (2022) "Tonal variability and marginal contrast: Lexical pitch accent in Uspanteko"
 
 # Disclaimer #
 These materials are posted in the spirit of transparency, but also in case they're useful for someone else. I've made very little effort to clean up or otherwise normalize filenames, code, etc.
