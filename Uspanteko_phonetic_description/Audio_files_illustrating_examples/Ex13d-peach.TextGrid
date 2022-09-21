@@ -1,0 +1,56 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.4911169237021227 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 0.4911169237021227 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.1068488099867868 
+            text = "t" 
+        intervals [2]:
+            xmin = 0.1068488099867868 
+            xmax = 0.10715278335322864 
+            text = "" 
+        intervals [3]:
+            xmin = 0.10715278335322864 
+            xmax = 0.16965857364255044 
+            text = "r" 
+        intervals [4]:
+            xmin = 0.16965857364255044 
+            xmax = 0.1718909232957344 
+            text = "" 
+        intervals [5]:
+            xmin = 0.1718909232957344 
+            xmax = 0.34405653089084637 
+            text = "a:" 
+        intervals [6]:
+            xmin = 0.34405653089084637 
+            xmax = 0.34489802141808923 
+            text = "" 
+        intervals [7]:
+            xmin = 0.34489802141808923 
+            xmax = 0.4888845740489387 
+            text = "s" 
+        intervals [8]:
+            xmin = 0.4888845740489387 
+            xmax = 0.4911169237021227 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 0.4911169237021227 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.4911169237021227 
+            text = "traas" 

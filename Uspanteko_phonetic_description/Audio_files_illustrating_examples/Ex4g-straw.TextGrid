@@ -1,0 +1,52 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.5244348224476312 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 0.5244348224476312 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.0014459614068869087 
+            text = "" 
+        intervals [2]:
+            xmin = 0.0014459614068869087 
+            xmax = 0.22746124808782042 
+            text = "k7" 
+        intervals [3]:
+            xmin = 0.22746124808782042 
+            xmax = 0.2300893328166751 
+            text = "" 
+        intervals [4]:
+            xmin = 0.2300893328166751 
+            xmax = 0.35492335743694525 
+            text = "i" 
+        intervals [5]:
+            xmin = 0.35492335743694525 
+            xmax = 0.35886548453021305 
+            text = "" 
+        intervals [6]:
+            xmin = 0.35886548453021305 
+            xmax = 0.523120780083218 
+            text = "m" 
+        intervals [7]:
+            xmin = 0.523120780083218 
+            xmax = 0.5244348224476312 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 0.5244348224476312 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.5244348224476312 
+            text = "k'im" 
