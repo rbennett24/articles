@@ -1,0 +1,38 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.3609906355218868 
+tiers? <exists> 
+size = 1 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "SEG" 
+        xmin = 0 
+        xmax = 0.3609906355218868 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.03972249348958545 
+            text = "ʃ" 
+        intervals [2]:
+            xmin = 0.03972249348958545 
+            xmax = 0.06591896823434325 
+            text = "j" 
+        intervals [3]:
+            xmin = 0.06591896823434325 
+            xmax = 0.11356199186992082 
+            text = "e" 
+        intervals [4]:
+            xmin = 0.11356199186992082 
+            xmax = 0.2519902553763462 
+            text = "s" 
+        intervals [5]:
+            xmin = 0.2519902553763462 
+            xmax = 0.3108679731638439 
+            text = "ˈa" 
+        intervals [6]:
+            xmin = 0.3108679731638439 
+            xmax = 0.3609906355218868 
+            text = "χ" 
