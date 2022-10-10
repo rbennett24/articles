@@ -1,0 +1,68 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.5392743764172335 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 0.5392743764172335 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.5392743764172335 
+            text = "inmasaat" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "transcription" 
+        xmin = 0 
+        xmax = 0.5392743764172335 
+        intervals: size = 11 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.004040518697234052 
+            text = "" 
+        intervals [2]:
+            xmin = 0.004040518697234052 
+            xmax = 0.05845327046950725 
+            text = "i" 
+        intervals [3]:
+            xmin = 0.05845327046950725 
+            xmax = 0.05934528279364288 
+            text = "" 
+        intervals [4]:
+            xmin = 0.05934528279364288 
+            xmax = 0.09368775727286449 
+            text = "n" 
+        intervals [5]:
+            xmin = 0.09368775727286449 
+            xmax = 0.0941337634349323 
+            text = "" 
+        intervals [6]:
+            xmin = 0.0941337634349323 
+            xmax = 0.1445324597485952 
+            text = "m" 
+        intervals [7]:
+            xmin = 0.1445324597485952 
+            xmax = 0.14587047823479862 
+            text = "" 
+        intervals [8]:
+            xmin = 0.14587047823479862 
+            xmax = 0.24666787086212438 
+            text = "s" 
+        intervals [9]:
+            xmin = 0.24666787086212438 
+            xmax = 0.24800588934832782 
+            text = "" 
+        intervals [10]:
+            xmin = 0.24800588934832782 
+            xmax = 0.44647863146850464 
+            text = "a:" 
+        intervals [11]:
+            xmin = 0.44647863146850464 
+            xmax = 0.5392743764172335 
+            text = "t" 
