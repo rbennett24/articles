@@ -1,0 +1,80 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 1.3497361373414556 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 1.3497361373414556 
+        intervals: size = 12 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.04360183639369765 
+            text = "" 
+        intervals [2]:
+            xmin = 0.04360183639369765 
+            xmax = 0.22890722022745008 
+            text = "ʃ " 
+        intervals [3]:
+            xmin = 0.22890722022745008 
+            xmax = 0.3003502597778125 
+            text = "a" 
+        intervals [4]:
+            xmin = 0.3003502597778125 
+            xmax = 0.4477015288504349 
+            text = "t" 
+        intervals [5]:
+            xmin = 0.4477015288504349 
+            xmax = 0.515795675921874 
+            text = "i" 
+        intervals [6]:
+            xmin = 0.515795675921874 
+            xmax = 0.5526334931900296 
+            text = "n" 
+        intervals [7]:
+            xmin = 0.5526334931900296 
+            xmax = 0.7156129271642938 
+            text = "m" 
+        intervals [8]:
+            xmin = 0.7156129271642938 
+            xmax = 0.789288561700605 
+            text = "a" 
+        intervals [9]:
+            xmin = 0.789288561700605 
+            xmax = 0.9511516981818948 
+            text = "t͡s" 
+        intervals [10]:
+            xmin = 0.9511516981818948 
+            xmax = 1.1052007522123637 
+            text = "ˈe" 
+        intervals [11]:
+            xmin = 1.1052007522123637 
+            xmax = 1.220179393988728 
+            text = "χ" 
+        intervals [12]:
+            xmin = 1.220179393988728 
+            xmax = 1.3497361373414556 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 1.3497361373414556 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.04360183639369765 
+            text = "" 
+        intervals [2]:
+            xmin = 0.04360183639369765 
+            xmax = 1.220179393988728 
+            text = "xatinmatzej" 
+        intervals [3]:
+            xmin = 1.220179393988728 
+            xmax = 1.3497361373414556 
+            text = "" 

@@ -1,0 +1,60 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.7604147252628124 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 0.7604147252628124 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.08808331446992537 
+            text = "" 
+        intervals [2]:
+            xmin = 0.08808331446992537 
+            xmax = 0.1861917138524679 
+            text = "w" 
+        intervals [3]:
+            xmin = 0.1861917138524679 
+            xmax = 0.3006515131321009 
+            text = "ˈá" 
+        intervals [4]:
+            xmin = 0.3006515131321009 
+            xmax = 0.3880686125819305 
+            text = "ɓ̥" 
+        intervals [5]:
+            xmin = 0.3880686125819305 
+            xmax = 0.46416551210300516 
+            text = "i" 
+        intervals [6]:
+            xmin = 0.46416551210300516 
+            xmax = 0.755346210270423 
+            text = "ʃ" 
+        intervals [7]:
+            xmin = 0.755346210270423 
+            xmax = 0.7604147252628124 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 0.7604147252628124 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.08808331446992537 
+            text = "" 
+        intervals [2]:
+            xmin = 0.08808331446992537 
+            xmax = 0.755346210270423 
+            text = "wáb'ix" 
+        intervals [3]:
+            xmin = 0.755346210270423 
+            xmax = 0.7604147252628124 
+            text = "" 

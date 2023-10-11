@@ -1,0 +1,84 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 1.6634072115123821 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 1.6634072115123821 
+        intervals: size = 13 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.06019308733429248 
+            text = "" 
+        intervals [2]:
+            xmin = 0.06019308733429248 
+            xmax = 0.2485194954112409 
+            text = "ʃ" 
+        intervals [3]:
+            xmin = 0.2485194954112409 
+            xmax = 0.35649330270869134 
+            text = "i" 
+        intervals [4]:
+            xmin = 0.35649330270869134 
+            xmax = 0.44437895981126724 
+            text = "n" 
+        intervals [5]:
+            xmin = 0.44437895981126724 
+            xmax = 0.5473307295599991 
+            text = "t͡sˀ" 
+        intervals [6]:
+            xmin = 0.5473307295599991 
+            xmax = 0.6063396707574429 
+            text = "a" 
+        intervals [7]:
+            xmin = 0.6063396707574429 
+            xmax = 0.7130579686677138 
+            text = "q" 
+        intervals [8]:
+            xmin = 0.7130579686677138 
+            xmax = 0.7833664943497745 
+            text = "a" 
+        intervals [9]:
+            xmin = 0.7833664943497745 
+            xmax = 0.9428161865215908 
+            text = "t" 
+        intervals [10]:
+            xmin = 0.9428161865215908 
+            xmax = 1.05581203136776 
+            text = "s" 
+        intervals [11]:
+            xmin = 1.05581203136776 
+            xmax = 1.2554380239293252 
+            text = "ˈaː" 
+        intervals [12]:
+            xmin = 1.2554380239293252 
+            xmax = 1.4086101691652433 
+            text = "χ" 
+        intervals [13]:
+            xmin = 1.4086101691652433 
+            xmax = 1.6634072115123821 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 1.6634072115123821 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.06019308733429248 
+            text = "" 
+        intervals [2]:
+            xmin = 0.06019308733429248 
+            xmax = 1.4086101691652433 
+            text = "xintz'aqatsaaj" 
+        intervals [3]:
+            xmin = 1.4086101691652433 
+            xmax = 1.6634072115123821 
+            text = "" 

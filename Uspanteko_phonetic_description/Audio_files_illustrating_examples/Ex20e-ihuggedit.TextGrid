@@ -1,0 +1,72 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 1.028593506317221 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcripcion" 
+        xmin = 0 
+        xmax = 1.028593506317221 
+        intervals: size = 10 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.018765806950456668 
+            text = "" 
+        intervals [2]:
+            xmin = 0.018765806950456668 
+            xmax = 0.19826285355976217 
+            text = "ʃ" 
+        intervals [3]:
+            xmin = 0.19826285355976217 
+            xmax = 0.26972139344213975 
+            text = "i" 
+        intervals [4]:
+            xmin = 0.26972139344213975 
+            xmax = 0.32756878287073105 
+            text = "n" 
+        intervals [5]:
+            xmin = 0.32756878287073105 
+            xmax = 0.44326356172791376 
+            text = "m" 
+        intervals [6]:
+            xmin = 0.44326356172791376 
+            xmax = 0.524930464450631 
+            text = "a" 
+        intervals [7]:
+            xmin = 0.524930464450631 
+            xmax = 0.6814586946691723 
+            text = "t͡s" 
+        intervals [8]:
+            xmin = 0.6814586946691723 
+            xmax = 0.8652092257952859 
+            text = "ˈe" 
+        intervals [9]:
+            xmin = 0.8652092257952859 
+            xmax = 0.9672928541986824 
+            text = "χ" 
+        intervals [10]:
+            xmin = 0.9672928541986824 
+            xmax = 1.028593506317221 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "" 
+        xmin = 0 
+        xmax = 1.028593506317221 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.018765806950456668 
+            text = "" 
+        intervals [2]:
+            xmin = 0.018765806950456668 
+            xmax = 0.9672928541986824 
+            text = "xinmatzej" 
+        intervals [3]:
+            xmin = 0.9672928541986824 
+            xmax = 1.028593506317221 
+            text = "" 

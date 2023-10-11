@@ -1,0 +1,64 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 1.1691376400915416 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 1.1691376400915416 
+        intervals: size = 10 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.05710646274043563 
+            text = "" 
+        intervals [2]:
+            xmin = 0.05710646274043563 
+            xmax = 0.23502227162069536 
+            text = "ʃ" 
+        intervals [3]:
+            xmin = 0.23502227162069536 
+            xmax = 0.3578228570978312 
+            text = "i" 
+        intervals [4]:
+            xmin = 0.3578228570978312 
+            xmax = 0.4342106228670731 
+            text = "n" 
+        intervals [5]:
+            xmin = 0.4342106228670731 
+            xmax = 0.5599120095759522 
+            text = "t͡ʃ" 
+        intervals [6]:
+            xmin = 0.5599120095759522 
+            xmax = 0.6430683115525954 
+            text = "o" 
+        intervals [7]:
+            xmin = 0.6430683115525954 
+            xmax = 0.7416955534318698 
+            text = "l" 
+        intervals [8]:
+            xmin = 0.7416955534318698 
+            xmax = 0.9244460310317019 
+            text = "ˈeː" 
+        intervals [9]:
+            xmin = 0.9244460310317019 
+            xmax = 1.0327426103501207 
+            text = "χ" 
+        intervals [10]:
+            xmin = 1.0327426103501207 
+            xmax = 1.1691376400915416 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 1.1691376400915416 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.1691376400915416 
+            text = "xincholeej" 

@@ -1,0 +1,52 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 0.7128888041784123 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "transcription," 
+        xmin = 0 
+        xmax = 0.7128888041784123 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.07373420104307642 
+            text = "" 
+        intervals [2]:
+            xmin = 0.07373420104307642 
+            xmax = 0.1727859503147131 
+            text = "t͡ʃ" 
+        intervals [3]:
+            xmin = 0.1727859503147131 
+            xmax = 0.3844501050082701 
+            text = "ˈoː" 
+        intervals [4]:
+            xmin = 0.3844501050082701 
+            xmax = 0.6668655091815675 
+            text = "ʃ" 
+        intervals [5]:
+            xmin = 0.6668655091815675 
+            xmax = 0.7128888041784123 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 0.7128888041784123 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.07373420104307642 
+            text = "" 
+        intervals [2]:
+            xmin = 0.07373420104307642 
+            xmax = 0.6668655091815675 
+            text = "choox" 
+        intervals [3]:
+            xmin = 0.6668655091815675 
+            xmax = 0.7128888041784123 
+            text = "" 
