@@ -273,7 +273,7 @@ dorsal.peaks.plot.faceted.vcontext.place<-ggplot(data=transpoints.backness,
 dorsal.peaks.plot.faceted.vcontext.place
 
 cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_vcontext_place.pdf",
-          width=16,height=9.5)
+          width=16,height=14)
   print(dorsal.peaks.plot.faceted.vcontext.place)
 dev.off()
 
@@ -342,7 +342,7 @@ contrasts(transpoints.backness$voicing)
 
 # It doesn't make any sense to add item as a random effect, because you have one item/condition,
 # but you can play around with it if you like.
-transpoints.backness <- transpoints.backness %>% mutate(item=paste0(Speaker,syll.pos,c.place,v,sec.art,voicing))
+# transpoints.backness <- transpoints.backness %>% mutate(item=paste0(Speaker,syll.pos,c.place,v,sec.art,voicing))
 
 
 # Center and scale repetition
@@ -382,10 +382,14 @@ an.rev(m.r3)
 m.r4<-update(m.r3,~.-voicing) # Significant
 performance::test_performance(base.m,m.r1,m.r2,m.r3,m.r4)
 
+an.rev(m.r3)
+m.r4<-update(m.r3,~.-v:sec.art) # Significant
+performance::test_performance(base.m,m.r1,m.r2,m.r3,m.r4)
+
 # Store final model
 fm <- m.r3
 performance::check_collinearity(fm) # Low collinearity...but *slightly* wide CI for syll.pos:sec.art.
-anova(fm)
+print(summary(fm),correlation=T)
 
 
 ###########
@@ -413,6 +417,8 @@ performance::model_performance(fm,estimator="ML") # r^2 etc.
 
 # Get model summary
 anova(fm)
+summary(transpoints.backness$X)
+sd(transpoints.backness$X)
 
 library(xtable)
 res.table <- as.data.frame(round(coef(summary(fm)),6))
@@ -483,16 +489,33 @@ secart.emm
 contrast(secart.emm)
 pairs(secart.emm)
 
+v.emm <- emmeans(fm,"v")
+v.emm
+contrast(v.emm)
+pairs(v.emm)
+
+
 # Interaction terms (2-way)
 cplace.secart.int.emm <- emmeans(fm,c("c.place","sec.art"))
 cplace.secart.int.emm
 contrast(cplace.secart.int.emm)
 pairs(cplace.secart.int.emm,by="c.place") # Pairwise tests by group.
+pairs(cplace.secart.int.emm,by="sec.art")
 
 syllpos.secart.int.emm <- emmeans(fm,c("syll.pos","sec.art"))
 syllpos.secart.int.emm
 contrast(syllpos.secart.int.emm)
 pairs(syllpos.secart.int.emm,by="sec.art") # Pairwise tests by group.
+
+v.secart.emm <- emmeans(fm,c("v","sec.art"))
+v.secart.emm
+contrast(v.secart.emm)
+pairs(v.secart.emm,by="sec.art")
+
+v.syllpos.emm <- emmeans(fm,c("v","syll.pos"))
+v.syllpos.emm
+contrast(v.syllpos.emm)
+pairs(v.syllpos.emm,by="syll.pos")
 
 # More complex groupings
 syllpos.secart.cplace.int.emm <- emmeans(fm,c("syll.pos","c.place","sec.art"))
@@ -507,6 +530,7 @@ pairs(syllpos.secart.v.int.emm,by=c("syll.pos","sec.art"))
 pairs(syllpos.secart.v.int.emm,by=c("v","sec.art"))
 
 # Note how emmeans groups/branches from right-to-left rather than expected left-to-right
+emmeans(fm,c("v","sec.art","syll.pos"))
 contrast(emmeans(fm,c("v","sec.art","syll.pos")))
 
 
@@ -516,6 +540,18 @@ library(broom)
 library(HH) # For Brown-Forsythe test. There are lots of function name clashes here, so be careful. Shouldn't be an issue, though.
             # The Brown-Forsythe test is supposed to be e.g. more robust to violations of normality assumptions than Levene's F-test.
 
+# We compute 14 BF tests in the paper, so the adjusted alpha following stepwise Holm-Bonferroni correction would be:
+ntests <- 14
+alpha <- 0.05
+hm.alpha <- 0.05/seq(ntests,1)
+hm.alpha
+min(hm.alpha)
+
+transpoints.backness %>% group_by(sec.art) %>% summarize(SD=sd(X),
+                                                         mean=mean(X))
+hov(X~sec.art, data=transpoints.backness)
+
+
 transpoints.backness %>% group_by(sec.art,c.place) %>% summarize(SD=sd(X),
                                                                  mean=mean(X))
 
@@ -524,20 +560,10 @@ subset(transpoints.backness,c.place!="Dorsal") %>% group_by(sec.art) %>% do(tidy
 subset(transpoints.backness,c.place!="Labial") %>% group_by(sec.art) %>% do(tidy(hov(X~c.place, data=.)))
 
 
-transpoints.backness %>% group_by(sec.art) %>% summarize(SD=sd(X),
+transpoints.backness %>% filter(syll.pos=="Coda") %>% group_by(sec.art) %>% summarize(SD=sd(X),
                                                                  mean=mean(X))
 
-transpoints.backness %>% group_by(sec.art) %>% summarize(SD=sd(X),
-                                                         mean=mean(X))
-hov(X~sec.art, data=transpoints.backness)
+transpoints.backness %>% filter(syll.pos=="Coda") %>% hov(X~sec.art, data=.)
 
-
-transpoints.backness %>% group_by(syll.pos,sec.art) %>% summarize(SD=sd(X),
-                                                                 mean=mean(X))
-
-transpoints.backness %>% group_by(sec.art) %>% filter(syll.pos=="Coda") %>% summarize(SD=sd(X),
-                                                                                      mean=mean(X))
-hov(X~sec.art, data=transpoints.backness %>% filter(syll.pos=="Coda"))
-
-detach(package:broom)
 detach(package:HH)
+detach(package:broom)

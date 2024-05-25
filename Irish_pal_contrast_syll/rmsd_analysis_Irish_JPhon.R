@@ -744,6 +744,8 @@ contrasts(transpoints.raw$v)
 
 # Get model summary
 anova(fm)
+summary(transpoints.raw$RMSSD)
+sd(transpoints.raw$RMSSD)
 
 library(xtable)
 res.table <- as.data.frame(round(coef(summary(fm)),6))
@@ -829,6 +831,8 @@ syllpos.v.int.emm <- emmeans(fm,c("syll.pos","v"))
 syllpos.v.int.emm
 contrast(syllpos.v.int.emm)
 pairs(syllpos.v.int.emm,by="v")
+# emmeans(fm,c("v","syll.pos"))
+pairs(syllpos.v.int.emm,by="syll.pos")
 
 cplace.v.int.emm <- emmeans(fm,c("c.place","v"))
 cplace.v.int.emm
@@ -836,12 +840,12 @@ contrast(cplace.v.int.emm)
 pairs(cplace.v.int.emm,by="c.place") # Pairwise tests by group.
 pairs(cplace.v.int.emm,by="v")
 
-# Interaction terms (3-way)
+# More complex groupings
 cplace.v.syllpos.int.emm <- emmeans(fm,c("v","c.place","syll.pos"))
 cplace.v.syllpos.int.emm
 contrast(cplace.v.syllpos.int.emm)
 pairs(cplace.v.syllpos.int.emm,by=c("c.place","syll.pos")) # Pairwise tests by group.
-
+# pairs(cplace.v.syllpos.int.emm,by=c("c.place","v")) # Pairwise tests by group.
 
 
 ###########
@@ -850,20 +854,26 @@ library(broom)
 library(HH) # For Brown-Forsythe test. There are lots of function name clashes here, so be careful. Shouldn't be an issue, though.
             # The Brown-Forsythe test is supposed to be e.g. more robust to violations of normality assumptions than Levene's F-test.
 
+# We compute 14 BF tests in the paper, so the adjusted alpha following stepwise Holm-Bonferroni correction would be:
+ntests <- 14
+alpha <- 0.05
+hm.alpha <- 0.05/seq(ntests,1)
+hm.alpha
+min(hm.alpha)
+
 transpoints.raw %>% group_by(c.place) %>% summarize(SD=sd(RMSSD),
                                                     mean=mean(RMSSD))
-
-transpoints.raw %>% group_by(syll.pos,c.place) %>% summarize(SD=sd(RMSSD),
-                                                             mean=mean(RMSSD))
 
 hov(RMSSD~c.place, data=subset(transpoints.raw,c.place!="Coronal"))
 hov(RMSSD~c.place, data=subset(transpoints.raw,c.place!="Dorsal"))
 hov(RMSSD~c.place, data=subset(transpoints.raw,c.place!="Labial"))
 
+transpoints.raw %>% group_by(syll.pos,c.place) %>% summarize(SD=sd(RMSSD),
+                                                             mean=mean(RMSSD))
+
 subset(transpoints.raw,c.place!="Coronal") %>% group_by(syll.pos) %>% do(tidy(hov(RMSSD~c.place, data=.)))
 subset(transpoints.raw,c.place!="Dorsal") %>% group_by(syll.pos) %>% do(tidy(hov(RMSSD~c.place, data=.)))
 subset(transpoints.raw,c.place!="Labial") %>% group_by(syll.pos) %>% do(tidy(hov(RMSSD~c.place, data=.)))
-
 
 detach(package:HH)
 
