@@ -1,6 +1,6 @@
-- **raw_EdgeTrak_data_JPhon.RData** contains a dataframe called 'raw.EdgeTrak.data' which includes all of our raw EdgeTrak tracings.
-- **edgetrak_output_normalized_Irish_JPhon.RData** contains a dataframe called 'edgetrak.minmax' which includes all of our raw EdgeTrak tracings, following range normalization.
-- **tongue_peaks_Irish_JPhon.RData** contains a dataframe called 'Tongue.peaks' which includes backness values for the highest point on the dorsum for each of our raw EdgeTrak tracings.
+- **raw_EdgeTrak_data_JPhon.RData** contains a dataframe called *raw.EdgeTrak.data* which includes all of our raw EdgeTrak tracings.
+- **edgetrak_output_normalized_Irish_JPhon.RData** contains a dataframe called *edgetrak.minmax* which includes all of our raw EdgeTrak tracings, following range normalization.
+- **tongue_peaks_Irish_JPhon.RData** contains a dataframe called *Tongue.peaks* which includes backness values for the highest point on the dorsum for each of our raw EdgeTrak tracings.
 - **loess_plots_Irish_JPhon.R** generates loess plots. It needs to be run up to a certain point before running other scripts, because it defines some functions for polar transformation and plotting.
 - **rmsd_analysis_Irish_JPhon.R** produces our RMSSD analysis.
 - **peak_backness_analysis_Irish_JPhon.R** produces our tongue body peak backness analysis.
