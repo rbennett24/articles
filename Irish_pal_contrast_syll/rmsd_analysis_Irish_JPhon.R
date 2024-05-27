@@ -433,11 +433,11 @@ rawRMSS.plotdata$v <- rawRMSS.plotdata$v %>% fct_recode("i\u02D0" = "i",
 
 
 # Recode transitions
-rawRMSS.plotdata<-rawRMSS.plotdata %>% mutate(trans = case_when(syll.pos == "Coda" & frm.pos == "start" ~ "CV/VC transition",
-                                                                syll.pos == "Onset" & frm.pos == "end" ~ "CV/VC transition",
+rawRMSS.plotdata<-rawRMSS.plotdata %>% mutate(trans = case_when(syll.pos == "Coda" & frm.pos == "start" ~ "C release/VC transition",
+                                                                syll.pos == "Onset" & frm.pos == "end" ~ "C release/VC transition",
                                                                 TRUE ~ "no"))
 
-transpoints.raw<-subset(rawRMSS.plotdata,trans=="CV/VC transition")
+transpoints.raw<-subset(rawRMSS.plotdata,trans=="C release/VC transition")
 
 
 countlabels <- transpoints.raw %>% group_by(c.place,syll.pos) %>% summarise(N=n())
@@ -544,78 +544,6 @@ rms.raw.faceted.v
 cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv.pdf",
           width=20,height=14)
 print(rms.raw.faceted.v)
-dev.off()
-
-
-# Include vowel context for onsets only
-transpoints.raw.onset <- subset(transpoints.raw,syll.pos=="Onset")
-countlabels <- transpoints.raw.onset %>% group_by(c.place,syll.pos,v) %>% summarise(N=n())
-
-
-rms.raw.faceted.v.onset<-ggplot(data=transpoints.raw.onset)+
-  geom_violin(aes(y=RMSSD,x=v,fill=v), show.legend = FALSE)+
-  geom_boxplot(aes(y=RMSSD,x=v),width=0.2,color="black",coef=0,outlier.colour = "red",outlier.shape=NA,fill="white")+
-  stat_summary(aes(y=RMSSD,x=v),fun.y="median",geom='point',size=6,pch=18)+
-  stat_summary(aes(y=RMSSD,x=v),fun.y="mean",fun.min="mean",fun.max="mean",
-               geom="crossbar",width=0.75,lwd=.4,lty="solid",col="black")+
-  geom_text(inherit.aes=F,data=countlabels,aes(label=N,x=v), y=0.005,color="black",size=6,fontface= "bold") +
-  facet_grid(syll.pos~c.place)+
-  ggtitle("Difference scores for matching Cʲ vs. Cˠ pairs")+
-  ylab("RMSSD scores")+xlab("Vowel context")+
-  # scale_color_manual(values=CbbPalette)+
-  theme_bw(base_size=32)+
-  theme(strip.text = element_text(family = "Doulos SIL",size=36,face = "bold"),
-        plot.title = element_text(size = 32),
-        axis.title = element_text(size=32),
-        legend.key.width=unit(5,"line"),
-        legend.key.height=unit(1.25,"line"),
-        legend.title = element_text(size=28,face="bold"),
-        legend.text = element_text(size=28,face="bold"
-                                   #family = "Doulos SIL"``
-        ))+
-  scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
-
-
-rms.raw.faceted.v.onset
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv_onset.pdf",
-          width=16,height=8)
-print(rms.raw.faceted.v.onset)
-dev.off()
-
-
-# Include vowel context for codas only
-transpoints.raw.coda <- subset(transpoints.raw,syll.pos=="Coda")
-countlabels <- transpoints.raw.coda %>% group_by(c.place,syll.pos,v) %>% summarise(N=n())
-
-
-rms.raw.faceted.v.coda<-ggplot(data=transpoints.raw.coda)+
-  geom_violin(aes(y=RMSSD,x=v,fill=v), show.legend = FALSE)+
-  geom_boxplot(aes(y=RMSSD,x=v),width=0.2,color="black",coef=0,outlier.colour = "red",outlier.shape=NA,fill="white")+
-  stat_summary(aes(y=RMSSD,x=v),fun.y="median",geom='point',size=6,pch=18)+
-  stat_summary(aes(y=RMSSD,x=v),fun.y="mean",fun.min="mean",fun.max="mean",
-               geom="crossbar",width=0.75,lwd=.4,lty="solid",col="black")+
-  geom_text(inherit.aes=F,data=countlabels,aes(label=N,x=v), y=0.005,color="black",size=6,fontface= "bold") +
-  facet_grid(syll.pos~c.place)+
-  ggtitle("Difference scores for matching Cʲ vs. Cˠ pairs")+
-  ylab("RMSSD scores")+xlab("Vowel context")+
-  # scale_color_manual(values=CbbPalette)+
-  theme_bw(base_size=32)+
-  theme(strip.text = element_text(family = "Doulos SIL",size=36,face = "bold"),
-        plot.title = element_text(size = 32),
-        axis.title = element_text(size=32),
-        legend.key.width=unit(5,"line"),
-        legend.key.height=unit(1.25,"line"),
-        legend.title = element_text(size=28,face="bold"),
-        legend.text = element_text(size=28,face="bold"
-                                   #family = "Doulos SIL"
-        ))+
-  scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
-
-
-rms.raw.faceted.v.coda
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv_coda.pdf",
-          width=16,height=8)
-print(rms.raw.faceted.v.coda)
 dev.off()
 
 
@@ -932,3 +860,47 @@ ts.syll %>% arrange(syll.pos,speaker)
 
 detach(package:broom)
 
+
+###################
+# Re-make some plots looking at C releases rather than C release (onset) vs. C start (coda).
+###################
+
+# Recode transitions
+rawRMSS.plotdata<-rawRMSS.plotdata %>% mutate(trans = case_when(frm.pos == "end" ~ "C release",
+                                                                TRUE ~ "no"))
+
+transpoints.raw<-subset(rawRMSS.plotdata,trans=="C release")
+
+
+
+# Include vowel context
+countlabels <- transpoints.raw %>% group_by(c.place,syll.pos,v) %>% summarise(N=n())
+
+rms.raw.faceted.v.rel<-ggplot(data=transpoints.raw)+
+  geom_violin(aes(y=RMSSD,x=v,fill=v), show.legend = FALSE)+
+  geom_boxplot(aes(y=RMSSD,x=v),width=0.2,color="black",coef=0,outlier.colour = "red",outlier.shape=NA,fill="white")+
+  stat_summary(aes(y=RMSSD,x=v),fun.y="median",geom='point',size=6,pch=18)+
+  stat_summary(aes(y=RMSSD,x=v),fun.y="mean",fun.min="mean",fun.max="mean",
+               geom="crossbar",width=0.75,lwd=.4,lty="solid",col="black")+
+  geom_text(inherit.aes=F,data=countlabels,aes(label=N,x=v), y=0,color="black",size=12,fontface= "bold") +
+  facet_grid(syll.pos~c.place)+
+  ggtitle("Difference scores for matching Cʲ vs. Cˠ pairs")+
+  ylab("RMSSD scores")+xlab("Vowel context")+
+  # scale_color_manual(values=CbbPalette)+
+  theme_bw(base_size=48)+
+  theme(strip.text = element_text(family = "Doulos SIL",size=48,face = "bold"),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        legend.key.width=unit(5,"line"),
+        legend.key.height=unit(1.25,"line"),
+        legend.title = element_text(size=28,face="bold"),
+        legend.text = element_text(size=28,face="bold"
+                                   #family = "Doulos SIL"
+        ))+
+  scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
+
+rms.raw.faceted.v.rel
+cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv_release.pdf",
+          width=20,height=14)
+print(rms.raw.faceted.v.rel)
+dev.off()

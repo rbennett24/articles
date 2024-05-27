@@ -6,24 +6,7 @@ load("tongue_peaks_Irish_JPhon.RData")
 # Check factor types, and correct if needed.
 lapply(Tongue.peaks,is)
 
-# Tongue.peaks<-data.frame(Tongue.peaks)
-# Tongue.peaks$Speaker<-as.factor(as.character(Tongue.peaks$Speaker))
-# Tongue.peaks$syll.pos<-as.factor(as.character(Tongue.peaks$syll.pos))
-# Tongue.peaks$c.place<-as.factor(as.character(Tongue.peaks$c.place))
-# Tongue.peaks$v<-as.factor(as.character(Tongue.peaks$v))
-# Tongue.peaks$sec.art<-as.factor(as.character(Tongue.peaks$sec.art))
-# Tongue.peaks$rep<-as.factor(as.character(Tongue.peaks$rep))
-# Tongue.peaks$frm.pos<-as.factor(as.character(Tongue.peaks$frm.pos))
-# Tongue.peaks$X<-as.numeric(Tongue.peaks$X)
-# Tongue.peaks$Y<-as.numeric(Tongue.peaks$Y)
-# 
-# Tongue.peaks<-data.frame(Tongue.peaks)
-# 
-# lapply(Tongue.peaks,is)
-
-# Filter out dodgy data
-# For Munster 2, it looks like the highest point of the tongue is at the tongue tip instead of the tongue body for [ta], [tu] and [at]. And maybe some others. We agreed in December that we can use that data for the tracings, loess curves, RMS, etc., but we should probably not use the this subject's coronal data for any analyses involving the highest point of the tongue. That still seems like the right thing to do to me.
-
+# For Munster 2, it looks like the highest point of the tongue is at the tongue tip instead of the tongue body for [ta], [tu] and [at]. And maybe some others. So we exclude it to be safe.
 dorsal.peaks.filtered <- Tongue.peaks %>% filter(!(Speaker == "Munster, Speaker S2" & c.place=="coronal"))
 
 summary(Tongue.peaks$Speaker)
@@ -49,14 +32,14 @@ head(dorsal.peaks.filtered)
 
 
 # Recode transitions
-dorsal.peaks.filtered<-dorsal.peaks.filtered %>% mutate(trans = case_when(syll.pos == "Coda" & frm.pos == "start" ~ "CV/VC transition",
-                                                                syll.pos == "Onset" & frm.pos == "end" ~ "CV/VC transition",
+dorsal.peaks.filtered<-dorsal.peaks.filtered %>% mutate(trans = case_when(syll.pos == "Coda" & frm.pos == "start" ~ "C release/VC transition",
+                                                                syll.pos == "Onset" & frm.pos == "end" ~ "C release/VC transition",
                                                                 TRUE ~ "no"))
 
 
 dorsal.peaks.filtered$trans<-as.factor(dorsal.peaks.filtered$trans)
 
-transpoints.backness<-subset(dorsal.peaks.filtered,trans=="CV/VC transition")
+transpoints.backness<-subset(dorsal.peaks.filtered,trans=="C release/VC transition")
 summary(transpoints.backness)
 
 # Get counts
@@ -106,7 +89,8 @@ dorsal.peaks.plot.faceted<-ggplot(data=transpoints.backness,
   ylab("Fronting in normalized [0,1] units")+xlab("Syllable position")+
   # scale_color_manual(values=CbbPalette)+
   theme_bw(base_size=32)+
-  theme(strip.text = element_text(family = "Doulos SIL",size=36,face = "bold"),
+  theme(strip.text.x = element_text(family = "Doulos SIL",size=36,face = "bold"),
+        strip.text.y = element_text(family = "Doulos SIL",size=28,face = "bold"),
         plot.title = element_text(size = 32),
         axis.title = element_text(size=32),
         legend.key.width=unit(5,"line"),
@@ -127,7 +111,7 @@ dev.off()
 
 
 # By speaker
-# Temporarilty re-label speakers
+# Temporarily re-label speakers
 transpoints.backness.relab<-transpoints.backness
 
 transpoints.backness.relab$Speaker <- transpoints.backness.relab$Speaker %>% fct_recode("S1.Connacht" = "Connacht, Speaker S1",
@@ -224,7 +208,8 @@ dorsal.peaks.plot.faceted.vcontext<-ggplot(data=transpoints.backness,
   ylab("Fronting in normalized [0,1] units")+xlab("Vowel context")+
   # scale_color_manual(values=CbbPalette)+
   theme_bw(base_size=36)+
-  theme(strip.text = element_text(family = "Doulos SIL",size=36,face = "bold"),
+  theme(strip.text.x = element_text(family = "Doulos SIL",size=36,face = "bold"),
+        strip.text.y = element_text(family = "Doulos SIL",size=28,face = "bold"),
         plot.title = element_text(size = 32),
         axis.title = element_text(size=32),
         legend.key.width=unit(5,"line"),
@@ -567,3 +552,88 @@ transpoints.backness %>% filter(syll.pos=="Coda") %>% hov(X~sec.art, data=.)
 
 detach(package:HH)
 detach(package:broom)
+
+
+
+###################
+# Re-make some plots looking at C releases rather than C release (onset) vs. C start (coda).
+###################
+# Recode transitions
+dorsal.peaks.filtered<-dorsal.peaks.filtered %>% mutate(trans = case_when(frm.pos == "end" ~ "C release",
+                                                                          TRUE ~ "no"))
+
+dorsal.peaks.filtered$trans<-as.factor(dorsal.peaks.filtered$trans)
+
+transpoints.backness<-subset(dorsal.peaks.filtered,trans=="C release")
+summary(transpoints.backness)
+
+# Get counts
+countlabels <- transpoints.backness %>% group_by(c.place,syll.pos,sec.art) %>% summarise(N=n())
+
+dorsal.peaks.plot.faceted.rel<-ggplot(data=transpoints.backness,
+                                  aes(y=X,x=syll.pos))+
+  geom_violin(aes(fill=syll.pos),show.legend = F)+
+  geom_boxplot(width=0.2,color="black",coef=0,outlier.colour = "red",outlier.shape=NA,fill="white")+
+  stat_summary(fun.y="median",geom='point',size=6,pch=18)+
+  stat_summary(fun.y="mean",fun.min="mean",fun.max="mean",
+               geom="crossbar",width=0.75,lwd=.4,lty="solid",col="black")+
+  geom_text(inherit.aes=F,data=countlabels,aes(label=N,x=syll.pos,y=0),color="black",size=10,fontface= "bold") +
+  facet_grid(trans~c.place*sec.art)+
+  ggtitle("Fronting of dorsal peak for each raw tracing")+
+  ylab("Fronting in normalized [0,1] units")+xlab("Syllable position")+
+  # scale_color_manual(values=CbbPalette)+
+  theme_bw(base_size=32)+
+  theme(strip.text.x = element_text(family = "Doulos SIL",size=36,face = "bold"),
+        strip.text.y = element_text(family = "Doulos SIL",size=28,face = "bold"),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        legend.key.width=unit(5,"line"),
+        legend.key.height=unit(1.25,"line"),
+        legend.title = element_blank(),
+        legend.text = element_text(size=28,face="bold"
+                                   #family = "Doulos SIL"
+        ))+
+  scale_y_continuous(limits = c(0,0.8),breaks=seq(0,0.8,0.2))
+
+dorsal.peaks.plot.faceted.rel
+
+cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_place_release.pdf",
+          width=16,height=8)
+print(dorsal.peaks.plot.faceted.rel)
+dev.off()
+
+
+
+countlabels <- transpoints.backness %>% group_by(syll.pos,sec.art,v) %>% summarise(N=n())
+
+dorsal.peaks.plot.faceted.vcontext.rel<-ggplot(data=transpoints.backness,
+                                           aes(y=X,x=v))+
+  geom_violin(aes(fill=v),show.legend = F)+
+  geom_boxplot(width=0.2,color="black",coef=0,outlier.colour = "red",outlier.shape=NA,fill="white")+
+  stat_summary(fun.y="median",geom='point',size=6,pch=18)+
+  stat_summary(fun.y="mean",fun.min="mean",fun.max="mean",
+               geom="crossbar",width=0.75,lwd=.4,lty="solid",col="black")+
+  geom_text(inherit.aes=F,data=countlabels,aes(label=N,x=v,y=0),color="black",size=10,fontface= "bold") +
+  facet_grid(trans~sec.art*syll.pos)+
+  ggtitle("Fronting of dorsal peak for each raw tracing")+
+  ylab("Fronting in normalized [0,1] units")+xlab("Vowel context")+
+  # scale_color_manual(values=CbbPalette)+
+  theme_bw(base_size=36)+
+  theme(strip.text.x = element_text(family = "Doulos SIL",size=36,face = "bold"),
+        strip.text.y = element_text(family = "Doulos SIL",size=28,face = "bold"),
+        plot.title = element_text(size = 32),
+        axis.title = element_text(size=32),
+        legend.key.width=unit(5,"line"),
+        legend.key.height=unit(1.25,"line"),
+        legend.title = element_blank(),
+        legend.text = element_text(size=28,face="bold"
+                                   #family = "Doulos SIL"
+        ))+
+  scale_y_continuous(limits = c(0,0.8),breaks=seq(0,0.8,0.2))
+
+dorsal.peaks.plot.faceted.vcontext.rel
+
+cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_vcontext_release.pdf",
+          width=16,height=8)
+print(dorsal.peaks.plot.faceted.vcontext.rel)
+dev.off()
