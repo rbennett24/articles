@@ -1,7 +1,12 @@
 setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/")
+
+# Load the range normalized data we actually analyze.
 load("edgetrak_output_normalized_Irish_JPhon.RData")
 
- 
+# If you'd like to load the raw data, you can do that here:
+# load("raw_EdgeTrak_data_JPhon.RData")
+
+
 ##################
 # Load packages
 ##################
@@ -9,6 +14,15 @@ load("edgetrak_output_normalized_Irish_JPhon.RData")
 library(tidyverse)
 library(ggplot2)
 library(data.table)
+
+
+##################
+# Range normalization of raw data
+##################
+# edgetrak.minmax <- raw.EdgeTrak.data %>% group_by(Speaker) %>% mutate(Y = (Y-min(Y,na.rm=T))/(max(X,na.rm=T)-min(X,na.rm=T)),
+#                                                                       X = (X-min(X,na.rm=T))/(max(X,na.rm=T)-min(X,na.rm=T))
+#                                                                       ) %>% ungroup()
+
 
  
 ##################
