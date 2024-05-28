@@ -1,6 +1,20 @@
 library(tidyverse)
 computer<-"Tiamat"
 setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/"))
+
+# To reproduce our procedure for finding peak dorsal points, do the following.
+# load("edgetrak_output_normalized_Irish_JPhon.RData")
+
+# Tongue.peaks <- edgetrak.minmax %>% group_by(Speaker,c.place,v,sec.art,syll.pos,rep,frm.pos) %>%
+#                                     # Lower Y values are physically higher, so we look for minimum values.
+#                                     slice_min(Y) %>%
+#                                     summarize(X = mean(X), # Take mean X value in case of ties/plateaus
+#                                               Y = unique(Y)) %>% 
+#                                     ungroup()
+
+
+
+# Read in data frame of peak dorsal points, which is what we actually analyze.
 load("tongue_peaks_Irish_JPhon.RData")
 
 # Check factor types, and correct if needed.
