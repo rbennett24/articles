@@ -5,3 +5,5 @@
 - **rmssd_analysis_Irish_JPhon.R** produces our RMSSD analysis.
 - **peak_backness_analysis_Irish_JPhon.R** produces our tongue body peak backness analysis.
 - **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings.
+
+***Contact***: rbennett@ucsc.edu
