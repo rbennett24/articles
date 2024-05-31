@@ -4,3 +4,4 @@
 - **find_gesture_extrema_FACL.R** produces our timing analysis.
 - **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings.
 
+***Contact***: rbennett@ucsc.edu
