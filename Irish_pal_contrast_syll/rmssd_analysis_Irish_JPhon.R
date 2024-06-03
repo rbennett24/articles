@@ -171,6 +171,9 @@ rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.voicing = case_when(
 # rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.voicing=substr(Pair.Index,1,1),
 #                                                         pal.voicing=substr(Pair.Index,3,3))
 
+
+
+
 # ################################
 # # Make a plot illustrating how RMMSD works over overlapping regions only.
 # # We'll use sec.art as our comparison dimension.

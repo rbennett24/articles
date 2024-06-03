@@ -1,4 +1,7 @@
 library(tidyverse)
+
+
+# Where are the .Rdata files you're loading?
 computer<-"Tiamat"
 setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/"))
 

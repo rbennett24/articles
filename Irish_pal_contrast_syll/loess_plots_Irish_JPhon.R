@@ -1,10 +1,21 @@
+###################
+# User be warned: this generates *thousands* of PDFs, organized into nested subfolders. It takes a long time to run.
+###################
+
+# Where are the .Rdata files you're loading?
 setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/")
 
 # Load the range normalized data we actually analyze.
 load("edgetrak_output_normalized_Irish_JPhon.RData")
 
-# If you'd like to load the raw data, you can do that here:
-# load("raw_EdgeTrak_data_JPhon.RData")
+# If you'd like to load the raw data, you can do that here.
+# It is used for plotting raw contours below.
+load("raw_EdgeTrak_data_JPhon.RData")
+
+# Set output directory:
+computer <- "Tiamat"
+basedir <- paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/")
+outdir<-paste0(basedir,"Phase_2_results_2022/")
 
 
 ##################
@@ -25,6 +36,24 @@ library(data.table)
 
 
  
+##################
+# Select color schemes for plotting.
+##################
+
+# Colorblind-friendly color palette (see http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/). 
+# We're using here the colors they call "CbbPalette", which you can see on that web site. 
+# It says to use "scale_colour_manual(values=CbbPalette) to use these colors for points and lines. 
+# Maybe need that. The code below sets aside 8 colors, but we'll need only 5 for the Russian data. 
+# That's good, because I don't find the final three to be as colorblind-friendly.
+
+CbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# You can test colors out by doing something like the below. If replace "CbbPalette" with 1:8, 
+# you get R's standard first 8 colors.
+
+# plot(1:8, 1:8, col=CbbPalette, pch=19, cex=3, xlab="", ylab="")
+
+
 ##################
 # Make plots using the CharisSIL IPA font.
 ##################
@@ -353,7 +382,7 @@ plotPolarFits <- function(inputdata,
   if (dialectFacet==F){
     # Reposition the legend.
     ultPlot <- ultPlot+theme(
-          legend.position = c(.01, .99),
+          legend.position.inside = c(.01, .99),
           legend.justification = c("left", "top")
           )+
       # Set plot limits
@@ -615,7 +644,7 @@ plotSet <- c.sec.comps.facet %>%
 for (k in 1:nrow(plotSet)){
   currplotRow<-plotSet[k,]
   
-  filename<-paste("Phase1_allspeakers",
+  filename<-paste("Phase2_allspeakers",
                   currplotRow$cbasicmerge,
                   "pal",
                   currplotRow$syll.pos,
@@ -722,7 +751,7 @@ plotSet <- c.dynam.comps.facet %>%
 for (k in 1:nrow(plotSet)){
   currplotRow<-plotSet[k,]
   
-  filename<-paste("Phase1_allspeakers",
+  filename<-paste("Phase2_allspeakers",
                   currplotRow$syll.pos,
                   currplotRow$cbasicpal,
                   currplotRow$v,
@@ -760,9 +789,10 @@ plotSet <- c.syll.comps %>%
                                                              ", ", unique(.$Vowel)," context", # V context
                                                              ", C ",unique(.$frm.pos)              # Frame
                                         ),
-                                        plotsubtitle=unique(.$speaker))
+                                        plotsubtitle=unique(.$Speaker))
      
    )
+
 # 
 # 
 # # Save PDFs
@@ -927,7 +957,7 @@ plotSet <- c.v.comps.facet %>%
 for (k in 1:nrow(plotSet)){
   currplotRow<-plotSet[k,]
   
-  filename<-paste("Phase1_allspeakers",
+  filename<-paste("Phase2_allspeakers",
                   currplotRow$syll.pos,
                   currplotRow$cbasicpal,
                   "vowelcon",
@@ -1038,7 +1068,7 @@ plotSet <- c.place.comps.facet %>%
 for (k in 1:nrow(plotSet)){
   currplotRow<-plotSet[k,]
   
-  filename<-paste("Phase1_allspeakers",
+  filename<-paste("Phase2_allspeakers",
                   currplotRow$syll.pos,
                   currplotRow$sec.art,
                   "cplace",
@@ -1107,7 +1137,7 @@ ultrasoundRaw <- function(inputdata,
   
     if (dialectFacet==F){
       ultPlot <- ultPlot+theme(
-      legend.position = c(.01, .99),
+      legend.position.inside = c(.01, .99),
       legend.justification = c("left", "top"),
       )+
 
@@ -1122,7 +1152,7 @@ ultrasoundRaw <- function(inputdata,
     
   } else if (dialectFacet==T){
     # Add faceting
-    ultPlot <- ultPlot+facet_wrap(dialect~subj, nrow=3)+theme(strip.text = element_text(face = "bold",size=32))+
+    ultPlot <- ultPlot+facet_grid(dialect~subj)+theme(strip.text = element_text(face = "bold",size=32))+
 
       scale_y_reverse(limits=c(0.75,-0.2),breaks=seq(-0.2,0.75,0.1))+
       scale_x_continuous(limits=c(0,1),breaks=seq(0,1,0.1))+
@@ -1274,12 +1304,10 @@ for (k in 1:nrow(plotSet)){
 }
 
 
+
 ##########################
-#########################
 # Make raw tracings one rep at a time and mark highest point of tongue
 # This is a modified copy of the above, with mods noted in *** commments
-# This can be done after running the code up to creation of final edgetrak data frame.
-##########################
 ##########################
 
 # We define a standard, semi-generic function for plotting raw ultrasound tracings.
@@ -1294,21 +1322,18 @@ ultrasoundRaw <- function(inputdata,
   # Current plotting parameters below make this pointless, but 
   # this makes the title of the legend look nicer when the title is included.
 
-# ***Commented out next line and removed the 3 lines using Repetition in aes below.
+  # ***Commented out next line and removed the 3 lines using Repetition in aes below.
   
-#  inputdata<-inputdata %>% rename(Repetition=rep)
+  #  inputdata<-inputdata %>% rename(Repetition=rep)
 
       ultPlot <- ggplot(data=inputdata,
                     aes(x=X,
                         y=Y)
                     )+
-                    
-# *** The key line added is the second geom_point line below.                      
-                      
+        
                       # Using geom_path rather than geom_line preserves the order of points as they appear in the input dataframe.
                       geom_path(lwd=1,na.rm=TRUE,alpha=0.5)+
                       geom_point(size=2,na.rm=TRUE,alpha=0.5)+
-#                      geom_point(aes(x=X[Y==min(Y)], y=min(Y)), col="black", shape=4, size=7)+
                       geom_line(aes(y=min(Y)), col="black")+
                       
                       ggtitle(plotmaintitle)+
@@ -1329,7 +1354,7 @@ ultrasoundRaw <- function(inputdata,
                     
                     if (dialectFacet==F){
                       ultPlot <- ultPlot+theme(
-                        legend.position = c(.01, .99),
+                        legend.position.inside = c(.01, .99),
                         legend.justification = c("left", "top"),
                       )+
                         
@@ -1433,7 +1458,7 @@ plotSet <- edgetrak.minmax %>% group_by(.dots = c("dialect", "subj", "cmerge","v
 # for (k in 1:20){
   currplotRow<-plotSet[k,]
 
-# ***Added rep below. Also changed "raw" to "minmax". This should be done
+  # ***Added rep below. Also changed "raw" to "minmax". This should be done
   # for regular code above for raw tracings too, if using edgetrak.minmax.
   
   filename<-paste(currplotRow$dialect,
@@ -1485,7 +1510,7 @@ plotSet <- edgetrak.minmax %>% group_by(.dots = c("cmerge","v", "frm.pos","cbasi
 for (k in 1:nrow(plotSet)){
   currplotRow<-plotSet[k,]
   
-  filename<-paste("Phase1_allspeakers_raw",
+  filename<-paste("Phase2_allspeakers_raw",
                   currplotRow$syll.pos,
                   currplotRow$cbasicpal,
                   currplotRow$v,
@@ -1500,4 +1525,3 @@ for (k in 1:nrow(plotSet)){
 }
 
 rm(k)
-  
