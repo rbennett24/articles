@@ -1,21 +1,15 @@
-#####################
-# To do
-#####################
-# Fix formant tracking errors
-# Maybe: figure out how to look for minima/maxima/etc. while addressing Jaye's worries about plateaus.
-
-
 ######################################
 # Packages
 ######################################
 library(tidyverse)
 library(stringr)
 
+
 ######################################
 # Set working directory
 ######################################
 computer = "Tiamat"
-setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/Phase_2_scripts/Praat/Formants_Carnie/Praat_input/"))
+setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/Praat scripts/Carnie_volume/Formants_Carnie/Praat_input/"))
 
 
 ######################################
@@ -143,14 +137,6 @@ ggplot(data = formants)+
   guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))+
   scale_y_continuous(breaks = seq(0,max(formants$freq,na.rm=T),200))
-
-
-######################################
-# Filter out any data we think is too noisy
-######################################
-
-# Subset out bad conditions, speakers, etc.
-
 
 
 
@@ -293,20 +279,6 @@ nrow(subset(formants,formant=="F2"))
 nrow(subset(formants,formant=="F2")) - nrow(subset(formants.trimmed,formant=="F2"))
 nrow(subset(formants.trimmed,formant=="F2"))/nrow(subset(formants,formant=="F2"))
 
-# Now do it WITHIN each vowel quality
-# formants.trimmed <- formants %>% filter(formant != "F3") %>% group_by(formant, v) %>% 
-#                                  filter(log.Fx.norm <= mean(log.Fx.norm) + 2 * sd(log.Fx.norm) &
-#                                         log.Fx.norm >= mean(log.Fx.norm) - 2 * sd(log.Fx.norm))
-# 
-# formants.F3.norm.trimmed <- formants.F3.norm %>% group_by(formant.F3, v) %>% 
-#                                  filter(freq <= mean(freq) + 2 * sd(freq) &
-#                                         freq >= mean(freq) - 2 * sd(freq))
-# 
-# # How much F2 data does this eliminate?
-# nrow(subset(formants.trimmed,formant=="F2"))
-# nrow(subset(formants,formant=="F2"))
-# nrow(subset(formants,formant=="F2")) - nrow(subset(formants.trimmed,formant=="F2"))
-# nrow(subset(formants.trimmed,formant=="F2"))/nrow(subset(formants,formant=="F2"))
 
 ##########
 
@@ -399,77 +371,3 @@ ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
   scale_x_continuous(breaks = seq(min(formants.F3.norm.trimmed$step,na.rm=T),max(formants.F3.norm.trimmed$step,na.rm=T),1))+
   xlab("Step (in normalized time)")+
   ylab("F3-normalized frequency")
-
-
-
-
-
-
-
-
-
-
-
-
-
-########################
-# Discarded draft plots
-########################
-
-# ggplot(data = formants)+
-#   geom_vline(xintercept=median(formants$step),lwd=0.5,lty="dashed")+
-#   geom_smooth(aes(x=step,y=freq,color=formant))+
-#   scale_color_manual(values=colorSet)+
-#   facet_grid(v~interaction(prec.c,sec.art))+
-#   theme_bw(base_size = 16)+
-#   theme(strip.text.y = element_text(angle = 0),
-#         strip.text = element_text(face = "bold"))+
-#   guides(color="none")+
-#   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-# 
-# 
-# ggplot(data = formants)+
-#   geom_vline(xintercept=median(formants$step),lwd=0.5,lty="dashed")+
-#   geom_smooth(aes(x=step,y=freq,color=formant))+
-#   scale_color_manual(values=colorSet)+
-#   facet_grid(v~c.place+sec.art)+
-#   theme_bw(base_size = 16)+
-#   theme(strip.text.y = element_text(angle = 0),
-#         strip.text = element_text(face = "bold"))+
-#   guides(color="none")+
-#   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-# 
-# 
-# ggplot(data = formants)+
-#   geom_vline(xintercept=median(formants$step),lwd=0.5,lty="dashed")+
-#   geom_smooth(aes(x=step,y=freq,color=formant))+
-#   scale_color_manual(values=colorSet)+
-#   facet_grid(sec.art~v+c.place)+
-#   theme_bw(base_size = 16)+
-#   theme(strip.text.y = element_text(angle = 0),
-#         strip.text = element_text(face = "bold"))+
-#   guides(color="none")+
-#   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-
-
-# ggplot(data = subset(formants,formant=="F2"))+
-#   geom_vline(xintercept=median(formants$step),lwd=0.5,lty="dashed")+
-#   geom_smooth(aes(x=step,y=freq,color=sec.art))+
-#   scale_color_manual(values=colorSet)+
-#   facet_grid(v~.)+
-#   theme_bw(base_size = 16)+
-#   theme(strip.text.y = element_text(angle = 0),
-#         strip.text = element_text(face = "bold"))+
-#   # guides(color="none")+
-#   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-# 
-# ggplot(data = subset(formants,formant=="F2"))+
-#   geom_vline(xintercept=median(formants$step),lwd=0.5,lty="dashed")+
-#   geom_smooth(aes(x=step,y=freq,color=sec.art))+
-#   scale_color_manual(values=colorSet)+
-#   facet_grid(v+prec.c~c.place)+
-#   theme_bw(base_size = 16)+
-#   theme(strip.text.y = element_text(angle = 0),
-#         strip.text = element_text(face = "bold"))+
-#   # guides(color="none")+
-#   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
