@@ -96,15 +96,16 @@ TB.back.by.landmark<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.startnorm,color=frm.p
         plot.title = element_text(size = 16),
         axis.title=element_blank())+
   guides(color="none")
+  # scale_y_continuous(limits=c(-0.2869639,0.39))
 
 TB.back.by.landmark
 
-# Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
-cairo_pdf(file="across_landmarks_startnorm.pdf",
-          width=12,height=9)
-  TB.back.by.landmark
-dev.off()
+# # Save w/ cairo
+# setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+# cairo_pdf(file="across_landmarks_startnorm.pdf",
+#           width=12,height=9)
+#   TB.back.by.landmark
+# dev.off()
 
 
 TB.back.by.landmark.reps<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.startnorm))+
@@ -193,11 +194,6 @@ tp.startnorm %>% ungroup() %>%
   )
 
 
-
-#######################################
-# QUESTION:IS THIS REDUNDANT GIVEN FOLLOW-UP EMMEANS() TESTS?
-#######################################
-
 ###############
 # Do a grouped t-test, just looking at C end values.
 t.test.outputs <- tp.startnorm %>% filter(frm.pos == "End") %>% group_by(syll.pos,c.place,sec.art,frm.pos) %>% do(tidy(t.test(.$X.startnorm))) %>% mutate(p.value = round(as.numeric(format(p.value, scientific = FALSE)),5))
@@ -280,7 +276,7 @@ t.test.outputs <- t.test.outputs %>% mutate(plabs = as.character(case_when(p.val
 t.test.outputs
 
 
-TB.back.by.landmark.labeled <- TB.back.by.landmark + geom_label(data=t.test.outputs %>% filter(plabs!=""),aes(label=plabs,x=frm.pos,y=0.35),nudge_x=-0.15,size=8,color="black")
+TB.back.by.landmark.labeled <- TB.back.by.landmark + geom_label(data=t.test.outputs %>% filter(plabs!=""),aes(label=plabs,x=1.15,y=0.27),size=8,color="black")
 
 TB.back.by.landmark.labeled
 
@@ -353,7 +349,6 @@ dev.off()
 ##########
 # Run a regression.
 library(lmerTest)
-library(emmeans)
 library(performance) # For model statistics
 
 
@@ -515,6 +510,7 @@ print(xtable(res.table,digits=4,
              sanitize.rownames.function = identity,
              sanitize.text.function = identity),
       include.rownames=FALSE)
+
 
 
 
