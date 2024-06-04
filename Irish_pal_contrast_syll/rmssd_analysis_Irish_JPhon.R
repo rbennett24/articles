@@ -644,12 +644,12 @@ performance::test_performance(base.m,m.r1,m.r2)
 # Store final model
 fm <- m.r1
 performance::check_collinearity(fm) # Low collinearity...but *very* wide CIs in some cases (vel.rep, c.place)
-# But when we check pairwise correlations between predictors, we see that neither vel.rep nor c.place is actually all that correlated
-# with any other predictor. So we're probably fine here.
-print(summary(fm),correlation=T)
+
 
 ###########
 # Check normality of residuals
+plot(performance::check_normality(fm),type = "density")
+
 cor(qqnorm(residuals(fm))$x,
     residuals(fm))
 qqnorm(residuals(fm))

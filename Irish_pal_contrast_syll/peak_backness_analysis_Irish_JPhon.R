@@ -391,11 +391,12 @@ performance::test_performance(base.m,m.r1,m.r2,m.r3,m.r4)
 # Store final model
 fm <- m.r3
 performance::check_collinearity(fm) # Low collinearity...but *slightly* wide CI for syll.pos:sec.art.
-print(summary(fm),correlation=T)
 
 
 ###########
 # Check normality of residuals
+plot(performance::check_normality(fm),type = "density")
+
 cor(qqnorm(residuals(fm))$x,
     residuals(fm))
 qqnorm(residuals(fm))
