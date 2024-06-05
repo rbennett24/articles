@@ -1,7 +1,7 @@
 form arguments
 
 	comment Where are the TextGrids and .wav files located?
-		text inDir C:\Users\Tiamat\Dropbox\Research\Irish\Irish_ultrasound_shared\Scripts\Phase_2_scripts\Praat\Formants_Carnie\Praat_input\
+		text inDir C:\Users\Tiamat\Dropbox\Research\Irish\Irish_ultrasound_shared\Scripts\Praat scripts\Carnie_volume\Formants_Carnie\Praat_input\
 
 	comment What tier are the target segments on?
 		integer seg_tier 3
@@ -10,7 +10,7 @@ form arguments
 		integer form_slice_count 11
 	
 	comment Window length (in seconds):
-		real wlen 0.035
+		real wlen 0.0475
 	
 	comment To help measure formants at edges of vowel intervals, add padding (= 2 * window length) 
 	comment to each side of extracted interval?
@@ -164,7 +164,7 @@ for snum from 1 to spkrnum
 				# All other settings here are the defaults.
 				select vchunk
 				# To Formant (burg): time step, max # of formants, formant ceiling, window length, pre-emphasis
-				To Formant (burg): 0, 5, 4800, wlen, 50
+				To Formant (burg): 0, 5.5, 4800, wlen, 50
 				formants$ = selected$ ("Formant")
 				
 				# Track: # of tracks, F1 ref, F2 ref, F3 ref, F4 ref, F5 ref, freq cost, bandwidth cost, transition cost
@@ -184,11 +184,22 @@ for snum from 1 to spkrnum
 				
 				if (f2Max >= 2200 or f1Max >= 800 or f2Min <= 900)
 					select vchunk
-					To Formant (burg): 0, 6, 5250, wlen, 50
+					To Formant (burg): 0, 6.5, 5250, wlen, 50
 					formants$ = selected$ ("Formant")
-				
-					Track: 3, f1_ref-150, f2_ref-200, f3_ref-300, 3850, 4950, 2, 2, 2
-					formantTrack$ = selected$ ("Formant")
+
+					if (f1Max >= 800)
+						Track: 3, f1_ref-100, f2_ref, f3_ref, 3850, 4950, 2, 2, 2
+						formantTrack$ = selected$ ("Formant")
+					elif (f2Max >= 2200)
+						Track: 3, f1_ref-100, f2_ref-200, f3_ref, 3850, 4950, 2, 2, 2
+						formantTrack$ = selected$ ("Formant")
+					elif (f2Min <= 900)
+						Track: 3, f1_ref, f2_ref+200, f3_ref+200, 3850, 4950, 2, 2, 2
+						formantTrack$ = selected$ ("Formant")
+					else
+						Track: 3, f1_ref, f2_ref, f3_ref, 3850, 4950, 2, 2, 2
+						formantTrack$ = selected$ ("Formant")
+					endif
 				endif
 				
 				# Take formant measurements over small windows of the formant

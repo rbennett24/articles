@@ -8,7 +8,7 @@ library(stringr)
 ######################################
 # Set working directory
 ######################################
-computer = "Tiamat"
+computer = "510fu"
 setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/Praat scripts/Carnie_volume/Formants_Carnie/Praat_input/"))
 
 
@@ -32,7 +32,48 @@ showColor<-function(pal){
 ######################################
 # Read in data
 ######################################
-formants <- read.csv("FACL_F2_tracks_all_spkrs.txt",sep="\t")
+formants.homebrewed <- read.csv("FACL_F2_tracks_all_spkrs.txt",sep="\t")
+
+
+######################################
+# Compare FastTrak data to the hand-extracted formant data, and merge as desired.
+######################################
+library(vroom)
+formant.csv.files <- fs::dir_ls(path = "csvs/",glob="*.csv")
+# formant.csv.files
+csvs<-vroom(formant.csv.files,id="filename",col_select=c(time,f1,f2,f3))
+
+# Add normalized time
+csvs <- csvs %>% group_by(filename) %>% mutate(step = ((time-min(time))/(max(time)-min(time))*100))
+
+# Pivot longer
+csvs <- csvs %>% pivot_longer(cols=c(f1,f2,f3),names_to = "formant",values_to="freq")
+csvs <- csvs %>% mutate(formant = toupper(formant))
+csvs
+
+# Clean up filenames
+csvs <- csvs %>% mutate(filename = gsub("_[[:digit:]]*$","",fs::path_ext_remove(basename(filename))))
+csvs
+
+# Get interval code from file info CVS
+fileInfo <- vroom("file_information.csv")
+
+fileInfo <- fileInfo %>% mutate(file = gsub("_[[:digit:]]*.wav$","",file)) %>% rename("filename" = "file")
+
+csvs <- left_join(csvs,fileInfo %>% select(filename,label),by="filename") %>%
+                                    rename("vowel.code" = "label") %>%
+                                    mutate(token.code = paste0(vowel.code,"-",filename),
+                                           speaker = gsub("_list[[:digit:]]*_sent[[:digit:]]*$","",filename)
+                                           )
+csvs
+
+# Compare formant measurements across methods
+nrow(csvs)
+nrow(formants.homebrewed)
+qqplot(csvs$freq,formants.homebrewed$freq)
+
+# Use the Fast Track data:
+formants <- csvs
 
 
 ######################################
@@ -44,7 +85,7 @@ bad.codes
 # Go clean up these TextGrids
 formants %>% filter(vowel.code %in% bad.codes) %>% distinct(token.code)
 
-# Ulster 2,3, and probably also 1, say pˠibˠ instead of pʲibˠ
+# Ulster 1, 2,3, say pˠibˠ instead of pʲibˠ
 # jibw => wibw
 formants.UL <- formants %>% filter(speaker %in% c("UL-subject1","UL-subject2","UL-subject3")) %>% 
              mutate(vowel.code = str_replace(vowel.code,'jibw', 'wibw')) %>% 
@@ -112,6 +153,7 @@ formants$vowel.code <- as.factor(formants$vowel.code)
 # Ulster 3 is not in our analysis anymore.
 formants <- subset(formants,speaker != "UL-3")
 
+
 ######################################
 # Get some summary stats
 ######################################
@@ -127,22 +169,30 @@ subset(formants,formant == "F1" & freq > 800)$c.place
 ######################################
 # Plot raw formants to make sure things look okay, grouped by token and speaker.
 ######################################
-ggplot(data = formants)+
+raw.formants.spk<-ggplot(data = formants)+
   geom_path(aes(x=step,y=freq,color=formant,
                 group=interaction(token.code,formant)),alpha=0.5)+
   scale_color_manual(values=colorSet)+
-  facet_grid(v~speaker)+
   theme_bw(base_size = 24)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))+
+  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
+  xlab("Normalized time (%)")+
   scale_y_continuous(breaks = seq(0,max(formants$freq,na.rm=T),200))
 
+raw.formants.spk+facet_grid(v~speaker)
+# raw.formants.spk+facet_grid(sec.art~speaker)
 
 
 ######################################
 # Log-additive regression normalization
 ######################################
+# 
+##############
+# NOTE: if you choose to use formants produced by Fast Track, this will take a *very* long time,
+# because there are many, many more tightly-spaced formant measurements in that data.
+##############
+#
 # The idea here is simple: some inter-talker variability in F1/F2 reflects physiology, i.e. the size of the vocal tract. If you want to normalize away from that variation specifically, you just need to scale speaker vowel spaces so that they are in the same space. This can be done by predicting observed formant values from vowel quality + speaker in a regression analysis, then transforming the original values by subtracting the estimated effect of speaker produced by the model (in essence re-scaling/sizing the vowel space---recall too that subtraction of log-transformed values is like division, i.e. ratio normalization)
 #
 # There are lots of apparent advantages to this method, e.g. when the data is not balanced across vowel qualities
@@ -179,6 +229,7 @@ spknorms <- dummy.coef(M)$speaker
 # Create column with normalization constant for each observation
 formants$spk.adjust<-rep(NA,nrow(formants))
 
+# This is the main bottleneck in processing speed here.
 for (currRow in 1:nrow(formants)){
   spk <- formants[currRow,]$speaker
   adj<-spknorms[spk]
@@ -205,9 +256,8 @@ ggplot(data = formants)+
   theme_bw(base_size = 24)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-  # scale_y_continuous(breaks = seq(0,max(formants$freq,na.rm=T),200))
-
+  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
+  xlab("Normalized time (%)")
 
 
 
@@ -232,10 +282,10 @@ ggplot(data = formants.F3.norm)+
   theme_bw(base_size = 24)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants.F3.norm$step,na.rm=T),max(formants.F3.norm$step,na.rm=T),1))
+  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
+  xlab("Normalized time (%)")
 
 
-# Check correlations between normalized and raw data
 nrow(subset(formants,formant!="F3"))
 nrow(formants.F3.norm)
 
@@ -279,12 +329,17 @@ nrow(subset(formants,formant=="F2"))
 nrow(subset(formants,formant=="F2")) - nrow(subset(formants.trimmed,formant=="F2"))
 nrow(subset(formants.trimmed,formant=="F2"))/nrow(subset(formants,formant=="F2"))
 
+# Mean # of measurements per formant per vowel:
+meas.count<-formants.trimmed %>% filter(formant=="F2") %>% group_by(token.code,formant) %>% summarize(count = n()) %>% ungroup()
+meas.count
+mean(meas.count$count)
+
+
 
 ##########
-
 # Normalized log frequency
 
-# Looks like outlier removal doesn't clean up enough formant tracking errors, e.g. F1 errors for the Ulster speakers (due to preaspiration?)
+# Outlier removal doesn't fully clean up formant tracking errors, e.g. F1 errors for the Ulster speakers (due to preaspiration?)
 
 ggplot(data = formants)+
   geom_path(aes(x=step,y=log.Fx.norm,color=formant,
@@ -294,13 +349,13 @@ ggplot(data = formants)+
   theme_bw(base_size = 24)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),1))
-# scale_y_continuous(breaks = seq(0,max(formants$freq,na.rm=T),200))
+  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
+  xlab("Normalized time (%)")
 
 
 lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art))+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -311,14 +366,13 @@ lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
         legend.title = element_blank(),
         legend.key.width = unit(2, 'cm')
         )+
-  # guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants.trimmed$step,na.rm=T),max(formants.trimmed$step,na.rm=T),1))+
-  xlab("Step (in normalized time)")+
+  scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
+  xlab("Normalized time (%)")+
   ylab("Normalized F2")
 lognorm.F2
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("C:/Users/510fu/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
 cairo_pdf(file="lognorm_F2.pdf",
           width=10,height=6)
   lognorm.F2
@@ -328,7 +382,7 @@ UL.data <- formants.trimmed %>% filter(str_detect(speaker,"UL"))
 
 lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art))+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -339,24 +393,23 @@ lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
         legend.title = element_blank(),
         legend.key.width = unit(2, 'cm')
   )+
-  # guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants.trimmed$step,na.rm=T),max(formants.trimmed$step,na.rm=T),1))+
-  xlab("Step (in normalized time)")+
+  xlab("Normalized time (%)")+
   ylab("Normalized F2")
 lognorm.F2.UL
 
-# Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
-cairo_pdf(file="lognorm_F2_UL.pdf",
-          width=10,height=6)
-  lognorm.F2.UL
-dev.off()
-
+# # Save w/ cairo
+# setwd("C:/Users/510fu/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+# cairo_pdf(file="lognorm_F2_UL.pdf",
+#           width=10,height=6)
+#   lognorm.F2.UL
+# dev.off()
+# 
 
 # F3 Normalized frequency
 ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
   geom_vline(xintercept=median(formants.F3.norm.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=freq,color=sec.art,lty=sec.art))+
+  geom_smooth(aes(x=step,y=freq,color=sec.art,lty=sec.art),lwd=2)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -367,7 +420,28 @@ ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
         legend.title = element_blank(),
         legend.key.width = unit(2, 'cm')
   )+
-  # guides(color="none")+
-  scale_x_continuous(breaks = seq(min(formants.F3.norm.trimmed$step,na.rm=T),max(formants.F3.norm.trimmed$step,na.rm=T),1))+
-  xlab("Step (in normalized time)")+
+  scale_x_continuous(breaks = seq(min(formants.F3.norm.trimmed$step,na.rm=T),max(formants.F3.norm.trimmed$step,na.rm=T),20))+
+  xlab("Normalized time (%)")+
   ylab("F3-normalized frequency")
+
+
+# Remove Ulster speakers
+not.UL.data <- formants.trimmed %>% filter(!str_detect(speaker,"UL"))
+
+lognorm.F2.not.UL<-ggplot(data = subset(not.UL.data,formant=="F2"))+
+  geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
+  scale_color_manual(values=colorSet)+
+  facet_grid(v~c.place)+
+  theme_bw(base_size = 24)+
+  theme(strip.text.y = element_text(angle = 0),
+        strip.text = element_text(face = "bold"),
+        axis.text = element_text(size=12),
+        panel.grid.minor = element_blank(),
+        legend.title = element_blank(),
+        legend.key.width = unit(2, 'cm')
+  )+
+  scale_x_continuous(breaks = seq(min(formants.trimmed$step,na.rm=T),max(formants.trimmed$step,na.rm=T),20))+
+  xlab("Normalized time (%)")+
+  ylab("Normalized F2")
+lognorm.F2.not.UL
