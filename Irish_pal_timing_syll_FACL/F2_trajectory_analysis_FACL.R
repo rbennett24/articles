@@ -1,4 +1,9 @@
 ######################################
+# TO DO --- SPEED UP WITH .rdata FILES
+######################################
+
+
+######################################
 # Packages
 ######################################
 library(tidyverse)
@@ -32,127 +37,147 @@ showColor<-function(pal){
 ######################################
 # Read in data
 ######################################
-formants.homebrewed <- read.csv("FACL_F2_tracks_all_spkrs.txt",sep="\t")
+
+# Formant measurements produced by a handmade script:
+# formants.homebrewed <- read.csv("FACL_F2_tracks_all_spkrs.txt",sep="\t")
 
 
 ######################################
 # Compare FastTrak data to the hand-extracted formant data, and merge as desired.
 ######################################
-library(vroom)
-formant.csv.files <- fs::dir_ls(path = "csvs/",glob="*.csv")
-# formant.csv.files
-csvs<-vroom(formant.csv.files,id="filename",col_select=c(time,f1,f2,f3))
+# This is time-intensive, so unless you want to actually work with the original CSV files for some reason, just load this:
+load("FastTrack_formant_data.Rdata")
 
-# Add normalized time
-csvs <- csvs %>% group_by(filename) %>% mutate(step = ((time-min(time))/(max(time)-min(time))*100))
+############################################################################
+# Note that the dataframe which is loaded here (<formants>) includes the log-additive regression
+# normalized formant values as well.
 
-# Pivot longer
-csvs <- csvs %>% pivot_longer(cols=c(f1,f2,f3),names_to = "formant",values_to="freq")
-csvs <- csvs %>% mutate(formant = toupper(formant))
-csvs
+# library(vroom)
+# formant.csv.files <- fs::dir_ls(path = "csvs/",glob="*.csv")
+# # formant.csv.files
+# csvs<-vroom(formant.csv.files,id="filename",col_select=c(time,f1,f2,f3))
+# 
+# # Add normalized time
+# csvs <- csvs %>% group_by(filename) %>% mutate(step = ((time-min(time))/(max(time)-min(time))*100))
+# 
+# # Pivot longer
+# csvs <- csvs %>% pivot_longer(cols=c(f1,f2,f3),names_to = "formant",values_to="freq")
+# csvs <- csvs %>% mutate(formant = toupper(formant))
+# csvs
+# 
+# # Clean up filenames
+# csvs <- csvs %>% mutate(filename = gsub("_[[:digit:]]*$","",fs::path_ext_remove(basename(filename))))
+# csvs
+# 
+# # Get interval code from file info CVS
+# fileInfo <- vroom("file_information.csv")
+# 
+# fileInfo <- fileInfo %>% mutate(file = gsub("_[[:digit:]]*.wav$","",file)) %>% rename("filename" = "file")
+# 
+# csvs <- left_join(csvs,fileInfo %>% select(filename,label),by="filename") %>%
+#                                     rename("vowel.code" = "label") %>%
+#                                     mutate(token.code = paste0(vowel.code,"-",filename),
+#                                            speaker = gsub("_list[[:digit:]]*_sent[[:digit:]]*$","",filename)
+#                                            )
+# csvs
 
-# Clean up filenames
-csvs <- csvs %>% mutate(filename = gsub("_[[:digit:]]*$","",fs::path_ext_remove(basename(filename))))
-csvs
 
-# Get interval code from file info CVS
-fileInfo <- vroom("file_information.csv")
+# # Compare formant measurements across methods
+# nrow(csvs)
+# nrow(formants.homebrewed)
+# qqplot(csvs$freq,formants.homebrewed$freq)
 
-fileInfo <- fileInfo %>% mutate(file = gsub("_[[:digit:]]*.wav$","",file)) %>% rename("filename" = "file")
 
-csvs <- left_join(csvs,fileInfo %>% select(filename,label),by="filename") %>%
-                                    rename("vowel.code" = "label") %>%
-                                    mutate(token.code = paste0(vowel.code,"-",filename),
-                                           speaker = gsub("_list[[:digit:]]*_sent[[:digit:]]*$","",filename)
-                                           )
-csvs
+# # Use the Fast Track data:
+# formants <- csvs
+############################################################################
 
-# Compare formant measurements across methods
-nrow(csvs)
-nrow(formants.homebrewed)
-qqplot(csvs$freq,formants.homebrewed$freq)
-
-# Use the Fast Track data:
-formants <- csvs
 
 
 ######################################
 # Clean up some errors in TextGrid coding
 ######################################
-bad.codes<-unique(formants$vowel.code[!(str_detect(formants$vowel.code, '[0jw][aiu][ptkbdg][jw][[:digit:]]'))])
-bad.codes
+# The following is only necessary if you *don't* call load("FastTrack_formant_data.Rdata") above.
 
-# Go clean up these TextGrids
-formants %>% filter(vowel.code %in% bad.codes) %>% distinct(token.code)
-
-# Ulster 1, 2,3, say pˠibˠ instead of pʲibˠ
-# jibw => wibw
-formants.UL <- formants %>% filter(speaker %in% c("UL-subject1","UL-subject2","UL-subject3")) %>% 
-             mutate(vowel.code = str_replace(vowel.code,'jibw', 'wibw')) %>% 
-             mutate(token.code = str_replace(token.code,'jibw', 'wibw'))
-
-formants.notUL <- formants %>% filter(!(speaker %in% c("UL-subject1","UL-subject2","UL-subject3")))
-
-formants <- rbind(formants.notUL,formants.UL)
-
-rm(formants.notUL,formants.UL)
-
-######################################
-# Clean up factors
-######################################
-
-# Split label codes into conditions.
-sl <- seq_len(nchar(formants$vowel.code[1]))
-formants<-separate(formants, vowel.code, paste0('X', sl), sep = sl,remove=F)
-
-# Rename factors
-formants <- tibble(formants) %>% rename(prec.c = X1,v = X2, c.place = X3, sec.art = X4, rep = X5)
-
-# Make sure all character vectors are actually treated as factors.
-formants <- formants %>% mutate_if(is.character,as.factor)
-
-# Revalue factor levels.
-summary(formants$prec.c)
-formants <- formants %>% mutate(prec.c = case_when(prec.c == "j" ~ "Cʲ", prec.c == "w" ~ "Cˠ", prec.c == "0" ~ "V-initial"))
-
-summary(formants$v)
-formants <- formants %>% mutate(v = case_when(v == "i" ~ "iː", v == "u" ~ "uː", v == "a" ~ "ɔː"))
-formants$v<-factor(formants$v,levels=c("iː","ɔː","uː"))
-
-summary(formants$c.place)
-formants <- formants %>% mutate(c.place = case_when(c.place == "b" ~ "P", c.place == "p" ~ "P",
-                                              c.place == "d" ~ "T", c.place == "t" ~ "T",
-                                              c.place == "g" ~ "K", c.place == "k" ~ "K"
-                                              ))
-formants$c.place<-factor(formants$c.place,levels=c("P","T","K"))
-
-summary(formants$sec.art)
-formants <- formants %>% mutate(sec.art = case_when(sec.art == "j" ~ "Cʲ", sec.art == "w" ~ "Cˠ"))
-
-
-############
-# Correct speaker numbering to be consistent with how we use numbering in the text in our paper
-formants <- formants %>% mutate(token.code = str_replace_all(token.code,'CM-subject4', 'CM-subject3'))
-formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'CM-subject4', 'CM-subject3'))
-
-formants <- formants %>% mutate(token.code = str_replace_all(token.code,'MU-subject2', 'MU-subject1'))
-formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'MU-subject2', 'MU-subject1'))
-
-formants <- formants %>% mutate(token.code = str_replace_all(token.code,'MU-subject5', 'MU-subject2'))
-formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'MU-subject5', 'MU-subject2'))
-
-formants <- formants %>% mutate(token.code = str_replace_all(token.code,'subject', ''))
-formants <- formants %>% mutate(speaker = str_replace_all(speaker,'subject', ''))
-
-formants$speaker <- as.factor(formants$speaker)
-formants$token.code <- as.factor(formants$token.code)
-formants$vowel.code <- as.factor(formants$vowel.code)
-
-
-############
-# Ulster 3 is not in our analysis anymore.
-formants <- subset(formants,speaker != "UL-3")
-
+############################################################################
+# 
+# bad.codes<-unique(formants$vowel.code[!(str_detect(formants$vowel.code, '[0jw][aiu][ptkbdg][jw][[:digit:]]'))])
+# bad.codes
+# 
+# # Go clean up these TextGrids
+# formants %>% filter(vowel.code %in% bad.codes) %>% distinct(token.code)
+# 
+# # Ulster 1, 2,3, say pˠibˠ instead of pʲibˠ
+# # jibw => wibw
+# formants.UL <- formants %>% filter(speaker %in% c("UL-subject1","UL-subject2","UL-subject3")) %>% 
+#              mutate(vowel.code = str_replace(vowel.code,'jibw', 'wibw')) %>% 
+#              mutate(token.code = str_replace(token.code,'jibw', 'wibw'))
+# 
+# formants.notUL <- formants %>% filter(!(speaker %in% c("UL-subject1","UL-subject2","UL-subject3")))
+# 
+# formants <- rbind(formants.notUL,formants.UL)
+# 
+# rm(formants.notUL,formants.UL)
+# 
+# 
+# 
+# ######################################
+# # Clean up factors
+# ######################################
+# 
+# # Split label codes into conditions.
+# sl <- seq_len(nchar(formants$vowel.code[1]))
+# formants<-separate(formants, vowel.code, paste0('X', sl), sep = sl,remove=F)
+# 
+# # Rename factors
+# formants <- tibble(formants) %>% rename(prec.c = X1,v = X2, c.place = X3, sec.art = X4, rep = X5)
+# 
+# # Make sure all character vectors are actually treated as factors.
+# formants <- formants %>% mutate_if(is.character,as.factor)
+# 
+# # Revalue factor levels.
+# summary(formants$prec.c)
+# formants <- formants %>% mutate(prec.c = case_when(prec.c == "j" ~ "Cʲ", prec.c == "w" ~ "Cˠ", prec.c == "0" ~ "V-initial"))
+# 
+# summary(formants$v)
+# formants <- formants %>% mutate(v = case_when(v == "i" ~ "iː", v == "u" ~ "uː", v == "a" ~ "ɔː"))
+# formants$v<-factor(formants$v,levels=c("iː","ɔː","uː"))
+# 
+# summary(formants$c.place)
+# formants <- formants %>% mutate(c.place = case_when(c.place == "b" ~ "P", c.place == "p" ~ "P",
+#                                               c.place == "d" ~ "T", c.place == "t" ~ "T",
+#                                               c.place == "g" ~ "K", c.place == "k" ~ "K"
+#                                               ))
+# formants$c.place<-factor(formants$c.place,levels=c("P","T","K"))
+# 
+# summary(formants$sec.art)
+# formants <- formants %>% mutate(sec.art = case_when(sec.art == "j" ~ "Cʲ", sec.art == "w" ~ "Cˠ"))
+# 
+# 
+# ############
+# # Correct speaker numbering to be consistent with how we use numbering in the text in our paper
+# formants <- formants %>% mutate(token.code = str_replace_all(token.code,'CM-subject4', 'CM-subject3'))
+# formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'CM-subject4', 'CM-subject3'))
+# 
+# formants <- formants %>% mutate(token.code = str_replace_all(token.code,'MU-subject2', 'MU-subject1'))
+# formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'MU-subject2', 'MU-subject1'))
+# 
+# formants <- formants %>% mutate(token.code = str_replace_all(token.code,'MU-subject5', 'MU-subject2'))
+# formants <- formants %>% mutate(vowel.code = str_replace_all(vowel.code,'MU-subject5', 'MU-subject2'))
+# 
+# formants <- formants %>% mutate(token.code = str_replace_all(token.code,'subject', ''))
+# formants <- formants %>% mutate(speaker = str_replace_all(speaker,'subject', ''))
+# 
+# formants$speaker <- as.factor(formants$speaker)
+# formants$token.code <- as.factor(formants$token.code)
+# formants$vowel.code <- as.factor(formants$vowel.code)
+# 
+# 
+# ############
+# # Ulster 3 is not in our analysis anymore.
+# formants <- subset(formants,speaker != "UL-3")
+# 
+############################################################################
 
 ######################################
 # Get some summary stats
@@ -187,61 +212,66 @@ raw.formants.spk+facet_grid(v~speaker)
 ######################################
 # Log-additive regression normalization
 ######################################
+# The following is only necessary if you *don't* call load("FastTrack_formant_data.Rdata") above.
+
+############################################################################
 # 
 ##############
 # NOTE: if you choose to use formants produced by Fast Track, this will take a *very* long time,
 # because there are many, many more tightly-spaced formant measurements in that data.
 ##############
-#
-# The idea here is simple: some inter-talker variability in F1/F2 reflects physiology, i.e. the size of the vocal tract. If you want to normalize away from that variation specifically, you just need to scale speaker vowel spaces so that they are in the same space. This can be done by predicting observed formant values from vowel quality + speaker in a regression analysis, then transforming the original values by subtracting the estimated effect of speaker produced by the model (in essence re-scaling/sizing the vowel space---recall too that subtraction of log-transformed values is like division, i.e. ratio normalization)
-#
-# There are lots of apparent advantages to this method, e.g. when the data is not balanced across vowel qualities
-# https://asa.scitation.org/doi/10.1121/1.5047742
-# https://assta.org/proceedings/ICPhS2019/papers/ICPhS_1604.pdf
-# "Log-additive regression normalization was applied to
-# reduce interspeaker variation"
-# Barreda, S., Nearey, T. 2017. A regression approach to
-# vowel normalization for missing and unbalanced data.
-# J. Acoust. Soc. Am. 142(4), 2583.
+# #
+# # The idea here is simple: some inter-talker variability in F1/F2 reflects physiology, i.e. the size of the vocal tract. If you want to normalize away from that variation specifically, you just need to scale speaker vowel spaces so that they are in the same space. This can be done by predicting observed formant values from vowel quality + speaker in a regression analysis, then transforming the original values by subtracting the estimated effect of speaker produced by the model (in essence re-scaling/sizing the vowel space---recall too that subtraction of log-transformed values is like division, i.e. ratio normalization)
+# #
+# # There are lots of apparent advantages to this method, e.g. when the data is not balanced across vowel qualities
+# # https://asa.scitation.org/doi/10.1121/1.5047742
+# # https://assta.org/proceedings/ICPhS2019/papers/ICPhS_1604.pdf
+# # "Log-additive regression normalization was applied to
+# # reduce interspeaker variation"
+# # Barreda, S., Nearey, T. 2017. A regression approach to
+# # vowel normalization for missing and unbalanced data.
+# # J. Acoust. Soc. Am. 142(4), 2583.
+# 
+# 
+# # An assumption of the method as implemented here is that F1/F2 should be scaled equally by speaker physiology/vocal tract size. This is explicitly defended on other grounds by Barreda & Nearey too.
+# 
+#  
+# formants$log.Fx<-log(formants$freq)
+#  
+# # Create vqual x formant interaction factor
+# formants$N = factor(interaction(formants$v,formants$formant))
+# 
+# M = lm(data=formants,
+#        log.Fx~0+speaker+N,
+#        contrasts=list(N=contr.sum))
+# 
+# # The estimated speaker means formant k can be extracted
+# # as S=dummy.coef(M)$S, and can then be used to normalize
+# # FF by subtracting each subjects S coefficient from
+# # the log formant frequencies produced by that speaker for
+# # that formant.
+# 
+# spknorms <- dummy.coef(M)$speaker
+# # vnorms <- dummy.coef(M)$N
+# 
+# # Create column with normalization constant for each observation
+# formants$spk.adjust<-rep(NA,nrow(formants))
+# 
+# # This is the main bottleneck in processing speed here.
+# for (currRow in 1:nrow(formants)){
+#   spk <- formants[currRow,]$speaker
+#   adj<-spknorms[spk]
+#   formants[currRow,]$spk.adjust<-adj
+# 
+# }
+# unique(formants$spk.adjust)
+# spknorms
+# 
+# # Apply speaker normalization as estimated from logistic regression
+# head(formants)
+# formants$log.Fx.norm<-formants$log.Fx-formants$spk.adjust
+############################################################################
 
-
-# An assumption of the method as implemented here is that F1/F2 should be scaled equally by speaker physiology/vocal tract size. This is explicitly defended on other grounds by Barreda & Nearey too.
-
- 
-formants$log.Fx<-log(formants$freq)
- 
-# Create vqual x formant interaction factor
-formants$N = factor(interaction(formants$v,formants$formant))
-
-M = lm(data=formants,
-       log.Fx~0+speaker+N,
-       contrasts=list(N=contr.sum))
-
-# The estimated speaker means formant k can be extracted
-# as S=dummy.coef(M)$S, and can then be used to normalize
-# FF by subtracting each subjects S coefficient from
-# the log formant frequencies produced by that speaker for
-# that formant.
-
-spknorms <- dummy.coef(M)$speaker
-# vnorms <- dummy.coef(M)$N
-
-# Create column with normalization constant for each observation
-formants$spk.adjust<-rep(NA,nrow(formants))
-
-# This is the main bottleneck in processing speed here.
-for (currRow in 1:nrow(formants)){
-  spk <- formants[currRow,]$speaker
-  adj<-spknorms[spk]
-  formants[currRow,]$spk.adjust<-adj
-
-}
-unique(formants$spk.adjust)
-spknorms
-
-# Apply speaker normalization as estimated from logistic regression
-head(formants)
-formants$log.Fx.norm<-formants$log.Fx-formants$spk.adjust
 
 
 ######################################
