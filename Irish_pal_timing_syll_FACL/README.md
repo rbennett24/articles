@@ -1,3 +1,8 @@
+Here are things you're likely to use:
+- **FastTrack_formant_data.Rdata**
+
+
+Here are things you're *not* likely to use:
 - **raw_EdgeTrak_data_FACL.RData** contains a dataframe called *raw.EdgeTrak.data* which includes all of our raw EdgeTrak tracings.
 - **edgetrak_output_normalized_Irish_FACL.RData** contains a dataframe called *edgetrak.minmax* which includes all of our raw EdgeTrak tracings, following range normalization.
 - **tongue_peaks_Irish_FACL.RData** contains a dataframe called *Tongue.peaks* which includes backness values for the highest point on the dorsum for each of our raw EdgeTrak tracings.
