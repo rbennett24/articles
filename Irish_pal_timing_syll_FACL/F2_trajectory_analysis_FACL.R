@@ -13,8 +13,8 @@ library(stringr)
 ######################################
 # Set working directory
 ######################################
-computer = "Tiamat"
-setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/Praat scripts/Carnie_volume/Formants_Carnie/Praat_input/"))
+computer = ""
+setwd(paste0("C:/Users/",computer,""))
 
 
 ######################################
@@ -402,7 +402,7 @@ lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
 lognorm.F2
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="lognorm_F2.pdf",
           width=10,height=6)
   lognorm.F2
@@ -429,7 +429,7 @@ lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
 lognorm.F2.UL
 
 # # Save w/ cairo
-# setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+# setwd("")
 # cairo_pdf(file="lognorm_F2_UL.pdf",
 #           width=10,height=6)
 #   lognorm.F2.UL
@@ -503,7 +503,7 @@ lognorm.F2.ms<-ggplot(data = formants.ms.f2 %>% filter(ms.before <= 200))+
 lognorm.F2.ms
 
   # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="lognorm_F2_ms.pdf",
           width=10,height=6)
   lognorm.F2.ms

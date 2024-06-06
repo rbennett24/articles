@@ -2,7 +2,7 @@ library(car)
 library(tidyverse)
 library(broom) # For tidy()
 
-outdir <- "C:\\Users\\Tiamat\\Dropbox\\Research\\Irish\\Irish_ultrasound_shared\\Scripts\\R scripts\\Carnie_volume\\"
+outdir <- ""
 setwd(outdir)
 
 # Choose a colorblind friendly palette
@@ -101,7 +101,7 @@ TB.back.by.landmark<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.startnorm,color=frm.p
 TB.back.by.landmark
 
 # # Save w/ cairo
-# setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+# setwd("")
 # cairo_pdf(file="across_landmarks_startnorm.pdf",
 #           width=12,height=9)
 #   TB.back.by.landmark
@@ -125,7 +125,7 @@ TB.back.by.landmark.reps<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.startnorm))+
 TB.back.by.landmark.reps
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="across_landmarks_byrep_startnorm.pdf",
           width=12,height=9)
   TB.back.by.landmark.reps
@@ -148,7 +148,7 @@ TB.back.by.landmark.reps.spk<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.startnorm))+
 TB.back.by.landmark.reps.spk
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="across_landmarks_byrep_spk_startnorm.pdf",
           width=12,height=9)
   TB.back.by.landmark.reps.spk
@@ -281,7 +281,7 @@ TB.back.by.landmark.labeled <- TB.back.by.landmark + geom_label(data=t.test.outp
 TB.back.by.landmark.labeled
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="across_landmarks_startnorm_labeled.pdf",
           width=12,height=9)
   TB.back.by.landmark.labeled
@@ -337,7 +337,7 @@ TB.back.by.landmark.reps.spk.noplace<-ggplot(tp.startnorm,aes(x=frm.pos,y=X.star
 TB.back.by.landmark.reps.spk.noplace
 
 # Save w/ cairo
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("")
 cairo_pdf(file="across_landmarks_byrep_spk_startnorm_NOPLACE.pdf",
           width=8,height=6)
 TB.back.by.landmark.reps.spk.noplace
