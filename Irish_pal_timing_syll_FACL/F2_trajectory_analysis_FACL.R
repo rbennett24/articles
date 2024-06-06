@@ -475,3 +475,36 @@ lognorm.F2.not.UL<-ggplot(data = subset(not.UL.data,formant=="F2"))+
   xlab("Normalized time (%)")+
   ylab("Normalized F2")
 lognorm.F2.not.UL
+
+
+#################
+# Plot F2 transitions in physical time
+
+
+formants.ms.f2 <- formants.trimmed %>% filter(formant=="F2") %>% group_by(token.code) %>% mutate(ms.before = (max(time) - time)*1000)
+formants.ms.f2
+
+lognorm.F2.ms<-ggplot(data = formants.ms.f2 %>% filter(ms.before <= 200))+
+  # geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
+  geom_smooth(aes(x=ms.before,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
+  scale_color_manual(values=colorSet)+
+  facet_grid(v~c.place)+
+  theme_bw(base_size = 24)+
+  theme(strip.text.y = element_text(angle = 0),
+        strip.text = element_text(face = "bold"),
+        axis.text = element_text(size=12),
+        panel.grid.minor = element_blank(),
+        legend.title = element_blank(),
+        legend.key.width = unit(2, 'cm')
+  )+
+  scale_x_reverse(breaks = seq(min(formants.ms.f2$ms.before,na.rm=T),max(formants.ms.f2$ms.before,na.rm=T),50))+
+  xlab("Time (in ms) preceding coda C")+
+  ylab("Normalized F2")
+lognorm.F2.ms
+
+  # Save w/ cairo
+setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+cairo_pdf(file="lognorm_F2_ms.pdf",
+          width=10,height=6)
+  lognorm.F2.ms
+dev.off()
