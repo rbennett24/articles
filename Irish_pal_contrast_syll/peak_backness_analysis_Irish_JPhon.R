@@ -2,8 +2,8 @@ library(tidyverse)
 
 
 # Where are the .Rdata files you're loading?
-computer<-"Tiamat"
-setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/"))
+computer<-""
+setwd(paste0("C:/Users/",computer,""))
 
 # To reproduce our procedure for finding peak dorsal points, do the following.
 # load("edgetrak_output_normalized_Irish_JPhon.RData")
@@ -121,7 +121,7 @@ dorsal.peaks.plot.faceted<-ggplot(data=transpoints.backness,
 dorsal.peaks.plot.faceted
 
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_place.pdf",
+cairo_pdf(file="peak_backness_place.pdf",
           width=16,height=8)
   print(dorsal.peaks.plot.faceted)
 dev.off()
@@ -172,7 +172,7 @@ dorsal.peaks.plot.faceted.byspkr<-ggplot(data=transpoints.backness.relab,
 dorsal.peaks.plot.faceted.byspkr
 
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_place_byspeaker.pdf",
+cairo_pdf(file="peak_backness_place_byspeaker.pdf",
           width=16,height=18)
 print(dorsal.peaks.plot.faceted.byspkr)
 dev.off()
@@ -239,7 +239,7 @@ dorsal.peaks.plot.faceted.vcontext<-ggplot(data=transpoints.backness,
 
 dorsal.peaks.plot.faceted.vcontext
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_vcontext.pdf",
+cairo_pdf(file="peak_backness_vcontext.pdf",
           width=16,height=8)
   print(dorsal.peaks.plot.faceted.vcontext)
 dev.off()
@@ -274,7 +274,7 @@ dorsal.peaks.plot.faceted.vcontext.place<-ggplot(data=transpoints.backness,
 
 dorsal.peaks.plot.faceted.vcontext.place
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_vcontext_place.pdf",
+cairo_pdf(file="peak_backness_vcontext_place.pdf",
           width=16,height=14)
   print(dorsal.peaks.plot.faceted.vcontext.place)
 dev.off()
@@ -615,7 +615,7 @@ dorsal.peaks.plot.faceted.rel<-ggplot(data=transpoints.backness,
 
 dorsal.peaks.plot.faceted.rel
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_place_release.pdf",
+cairo_pdf(file="peak_backness_place_release.pdf",
           width=16,height=8)
 print(dorsal.peaks.plot.faceted.rel)
 dev.off()
@@ -651,7 +651,7 @@ dorsal.peaks.plot.faceted.vcontext.rel<-ggplot(data=transpoints.backness,
 
 dorsal.peaks.plot.faceted.vcontext.rel
 
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/peak_backness_vcontext_release.pdf",
+cairo_pdf(file="peak_backness_vcontext_release.pdf",
           width=16,height=8)
 print(dorsal.peaks.plot.faceted.vcontext.rel)
 dev.off()

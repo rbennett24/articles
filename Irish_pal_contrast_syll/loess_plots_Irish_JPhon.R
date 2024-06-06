@@ -3,7 +3,7 @@
 ###################
 
 # Where are the .Rdata files you're loading?
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/")
+setwd("")
 
 # Load the range normalized data we actually analyze.
 load("edgetrak_output_normalized_Irish_JPhon.RData")
@@ -12,9 +12,9 @@ load("edgetrak_output_normalized_Irish_JPhon.RData")
 # load("raw_EdgeTrak_data_JPhon.RData")
 
 # Set output directory:
-computer <- "Tiamat"
-basedir <- paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/")
-outdir<-paste0(basedir,"Phase_2_results_2022/")
+computer <- ""
+basedir <- paste0("C:/Users/",computer,"")
+outdir<-paste0(basedir,"")
 
 
 ##################

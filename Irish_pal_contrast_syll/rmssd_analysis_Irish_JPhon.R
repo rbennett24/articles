@@ -392,7 +392,7 @@ rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.voicing = case_when(
 # sample.trim<-p+geom_point(inherit.aes = F, data=subset(trim.sample,sec.art=="Trimmed"),color="firebrick",shape=4,aes(x=X,y=Y),size=4)+geom_segment(inherit.aes = F, data=v.to.p,aes(x=b.x,y=b.y,xend=a.x,yend=a.y),color="skyblue3")
 # sample.trim
 # 
-# cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/trim_raw_example.pdf",
+# cairo_pdf(file="trim_raw_example.pdf",
 #           width=10,height=8)
 #   print(sample.trim)
 # dev.off()
@@ -411,7 +411,7 @@ rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.voicing = case_when(
 # sample.trim.2<-p+geom_point(inherit.aes = F, data=subset(trim.sample,sec.art=="Trimmed"),color="firebrick",shape=4,aes(x=X,y=Y),size=4)+geom_segment(inherit.aes = F, data=v.to.p,aes(x=b.x,y=b.y,xend=a.x,yend=a.y),color="skyblue3")
 # sample.trim.2
 # 
-# cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/trim_raw_example_2.pdf",
+# cairo_pdf(file="trim_raw_example_2.pdf",
 #           width=10,height=8)
 # print(sample.trim.2)
 # dev.off()
@@ -469,7 +469,7 @@ rms.raw.faceted<-ggplot(data=transpoints.raw)+
   scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
 
 rms.raw.faceted
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted.pdf",
+cairo_pdf(file="rmssd_raw_faceted.pdf",
           width=12,height=8)
   print(rms.raw.faceted)
 dev.off()
@@ -508,7 +508,7 @@ rms.raw.faceted.byspkr<-ggplot(data=transpoints.raw)+
   scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
 
 rms.raw.faceted.byspkr
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byspeaker.pdf",
+cairo_pdf(file="rmssd_raw_faceted_byspeaker.pdf",
           width=12,height=16)
 print(rms.raw.faceted.byspkr)
 dev.off()
@@ -544,7 +544,7 @@ rms.raw.faceted.v<-ggplot(data=transpoints.raw)+
   scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
 
 rms.raw.faceted.v
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv.pdf",
+cairo_pdf(file="rmssd_raw_faceted_byv.pdf",
           width=20,height=14)
 print(rms.raw.faceted.v)
 dev.off()
@@ -901,7 +901,7 @@ rms.raw.faceted.rel<-ggplot(data=transpoints.raw)+
   scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
 
 rms.raw.faceted.rel
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_release.pdf",
+cairo_pdf(file="rmssd_raw_faceted_release.pdf",
           width=12,height=8)
 print(rms.raw.faceted.rel)
 dev.off()
@@ -937,7 +937,7 @@ rms.raw.faceted.v.rel<-ggplot(data=transpoints.raw)+
   scale_y_continuous(limits = c(0,0.205),breaks=seq(0,0.20,0.05))
 
 rms.raw.faceted.v.rel
-cairo_pdf(file="C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Presentations/HisPhonCog 2023/rmssd_raw_faceted_byv_release.pdf",
+cairo_pdf(file="rmssd_raw_faceted_byv_release.pdf",
           width=20,height=14)
 print(rms.raw.faceted.v.rel)
 dev.off()
