@@ -13,7 +13,7 @@ Here are things you're *less* likely to use:
 
 Here are things you're *not* likely to use:
 - **FastTrack_csvs.zip** contains CSV files produced by the [Fast Track Praat plugin](https://github.com/santiagobarreda/FastTrack). If you want to work with these directly for some reason, instead of loading **FastTrack_formant_data.Rdata**, you'll also need **file_information.csv**.
-- **formant_Praat_files.zip** contains the audio files and TextGrids used for our formant analysis. It's a large file, and so needs do be downloaded here: [formant_Praat_files.zip
+- **formant_Praat_files.zip** contains the audio files and TextGrids used for our formant analysis. It's a large file, and so needs to be downloaded here: [formant_Praat_files.zip
  ](https://www.dropbox.com/scl/fi/2ktl7bv8itp1b5oqytpd1/FastTrack_csvs.zip?rlkey=ac6enume0fphd0sxmkf0f1s3m&dl=1)
 
 ***Contact***: rbennett@ucsc.edu
