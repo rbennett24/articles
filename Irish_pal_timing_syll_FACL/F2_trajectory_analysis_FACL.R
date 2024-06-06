@@ -13,7 +13,7 @@ library(stringr)
 ######################################
 # Set working directory
 ######################################
-computer = "510fu"
+computer = "Tiamat"
 setwd(paste0("C:/Users/",computer,"/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/Praat scripts/Carnie_volume/Formants_Carnie/Praat_input/"))
 
 
@@ -188,7 +188,7 @@ formants %>% group_by(formant) %>% summarize(mean=mean(freq,na.rm=T),
 formants %>% group_by(v,formant) %>% summarize(mean=mean(freq,na.rm=T),
                                              median=median(freq,na.rm=T))
 
-subset(formants,formant == "F1" & freq > 800)$c.place
+# subset(formants,formant == "F1" & freq > 800)$c.place
 
 
 ######################################
@@ -364,7 +364,7 @@ meas.count<-formants.trimmed %>% filter(formant=="F2") %>% group_by(token.code,f
 meas.count
 mean(meas.count$count)
 
-
+nrow(meas.count)
 
 ##########
 # Normalized log frequency
@@ -385,7 +385,7 @@ ggplot(data = formants)+
 
 lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -402,7 +402,7 @@ lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
 lognorm.F2
 
 # Save w/ cairo
-setwd("C:/Users/510fu/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
 cairo_pdf(file="lognorm_F2.pdf",
           width=10,height=6)
   lognorm.F2
@@ -412,7 +412,7 @@ UL.data <- formants.trimmed %>% filter(str_detect(speaker,"UL"))
 
 lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -429,7 +429,7 @@ lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
 lognorm.F2.UL
 
 # # Save w/ cairo
-# setwd("C:/Users/510fu/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
+# setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/Carnie_volume/")
 # cairo_pdf(file="lognorm_F2_UL.pdf",
 #           width=10,height=6)
 #   lognorm.F2.UL
@@ -439,7 +439,7 @@ lognorm.F2.UL
 # F3 Normalized frequency
 ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
   geom_vline(xintercept=median(formants.F3.norm.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=freq,color=sec.art,lty=sec.art),lwd=2)+
+  geom_smooth(aes(x=step,y=freq,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -460,7 +460,7 @@ not.UL.data <- formants.trimmed %>% filter(!str_detect(speaker,"UL"))
 
 lognorm.F2.not.UL<-ggplot(data = subset(not.UL.data,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2)+
+  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
