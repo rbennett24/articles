@@ -502,9 +502,45 @@ lognorm.F2.ms<-ggplot(data = formants.ms.f2 %>% filter(ms.before <= 200))+
   ylab("Normalized F2")
 lognorm.F2.ms
 
-  # Save w/ cairo
+# Save w/ cairo
 setwd("")
 cairo_pdf(file="lognorm_F2_ms.pdf",
           width=10,height=6)
   lognorm.F2.ms
+dev.off()
+
+
+####################
+# HERE HEREHERE HEREHEREH 
+####################
+
+# Extract loess curves, and add lines at appropriate maxima/minima
+loess.curves <- formants.ms.f2 %>% ungroup() %>% select(c.place,sec.art,v,log.Fx.norm,ms.before) %>%
+                   filter(ms.before <= 200) %>% 
+                   group_by(c.place,sec.art,v) %>%
+                   mutate(loess = predict(loess(log.Fx.norm ~ ms.before))
+                          )
+
+loess.curves
+loess.curves.peaks <- loess.curves %>% select(-log.Fx.norm) %>% distinct() %>% group_by(c.place,sec.art,v) %>%
+                               filter(sec.art == "Cʲ" & loess==max(loess) | sec.art == "Cˠ" & loess==min(loess)) %>%
+                               distinct() %>% arrange(c.place,sec.art,v)
+
+
+loess.curves.peaks.selected <- subset(loess.curves.peaks,
+                                      sec.art == "Cˠ" & v == "iː" | 
+                                      sec.art == "Cʲ" & v %in% c("uː","ɔː"))
+
+
+lognorm.F2.ms.labeled <- lognorm.F2.ms +
+geom_segment(data = loess.curves.peaks.selected, aes(x = ms.before, y = min(loess.curves$loess), yend = loess, color = sec.art), lwd = 1, arrow=arrow(length = unit(0.2, "cm"))) +
+geom_label(data=loess.curves.peaks.selected,aes(label=paste0(ms.before,"ms"),x=ms.before+15,y=min(loess.curves$loess)+0.05),size=4)
+
+# lognorm.F2.ms.labeled
+
+# Save w/ cairo
+setwd("")
+cairo_pdf(file="lognorm_F2_ms_labeled.pdf",
+          width=10,height=6)
+  lognorm.F2.ms.labeled
 dev.off()
