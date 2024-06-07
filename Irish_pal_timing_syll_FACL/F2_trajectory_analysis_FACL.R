@@ -1,9 +1,4 @@
 ######################################
-# TO DO --- SPEED UP WITH .rdata FILES
-######################################
-
-
-######################################
 # Packages
 ######################################
 library(tidyverse)
@@ -533,7 +528,7 @@ loess.curves.peaks.selected <- subset(loess.curves.peaks,
 
 
 lognorm.F2.ms.labeled <- lognorm.F2.ms +
-geom_segment(data = loess.curves.peaks.selected, aes(x = ms.before, y = min(loess.curves$loess), yend = loess, color = sec.art), lwd = 1, arrow=arrow(length = unit(0.2, "cm"))) +
+geom_segment(data = loess.curves.peaks.selected, aes(x = ms.before, y = min(loess.curves$loess), yend = loess, color = sec.art), lwd = 1.15, arrow=arrow(length = unit(0.3, "cm"),type = "closed")) +
 geom_label(data=loess.curves.peaks.selected,aes(label=paste0(ms.before,"ms"),x=ms.before+15,y=min(loess.curves$loess)+0.05),size=4)
 
 # lognorm.F2.ms.labeled
