@@ -197,7 +197,7 @@ raw.formants.spk<-ggplot(data = formants)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
-  xlab("Normalized time (%)")+
+  xlab("Normalized time (%) of vowel preceding coda C")+
   scale_y_continuous(breaks = seq(0,max(formants$freq,na.rm=T),200))
 
 raw.formants.spk+facet_grid(v~speaker)
@@ -282,7 +282,7 @@ ggplot(data = formants)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
-  xlab("Normalized time (%)")
+  xlab("Normalized time (%) of vowel preceding coda C")
 
 
 
@@ -308,7 +308,7 @@ ggplot(data = formants.F3.norm)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
-  xlab("Normalized time (%)")
+  xlab("Normalized time (%) of vowel preceding coda C")
 
 
 nrow(subset(formants,formant!="F3"))
@@ -361,6 +361,8 @@ mean(meas.count$count)
 
 nrow(meas.count)
 
+
+
 ##########
 # Normalized log frequency
 
@@ -375,12 +377,19 @@ ggplot(data = formants)+
   theme(axis.text = element_text(size=12))+
   guides(color="none")+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
-  xlab("Normalized time (%)")
+  xlab("Normalized time (%) of vowel preceding coda C")
+
+
+
+##########
+# Edit any factor levels you'd like to rename:
+# formants.trimmed <- formants.trimmed %>% mutate(sec.art = case_when(sec.art == "Cʲ" ~ "Before coda Cʲ",
+#                                                                     sec.art == "Cˠ" ~ "Before coda Cˠ"))
 
 
 lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
+  geom_smooth(method="loess",aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -392,7 +401,7 @@ lognorm.F2<-ggplot(data = subset(formants.trimmed,formant=="F2"))+
         legend.key.width = unit(2, 'cm')
         )+
   scale_x_continuous(breaks = seq(min(formants$step,na.rm=T),max(formants$step,na.rm=T),20))+
-  xlab("Normalized time (%)")+
+  xlab("Normalized time (%) of vowel preceding coda C")+
   ylab("Normalized F2")
 lognorm.F2
 
@@ -407,7 +416,7 @@ UL.data <- formants.trimmed %>% filter(str_detect(speaker,"UL"))
 
 lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
+  geom_smooth(method="loess",aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -419,7 +428,7 @@ lognorm.F2.UL<-ggplot(data = subset(UL.data,formant=="F2"))+
         legend.key.width = unit(2, 'cm')
   )+
   scale_x_continuous(breaks = seq(min(formants.trimmed$step,na.rm=T),max(formants.trimmed$step,na.rm=T),1))+
-  xlab("Normalized time (%)")+
+  xlab("Normalized time (%) of vowel preceding coda C")+
   ylab("Normalized F2")
 lognorm.F2.UL
 
@@ -434,7 +443,7 @@ lognorm.F2.UL
 # F3 Normalized frequency
 ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
   geom_vline(xintercept=median(formants.F3.norm.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=freq,color=sec.art,lty=sec.art),lwd=2.5)+
+  geom_smooth(method="loess",aes(x=step,y=freq,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -446,7 +455,7 @@ ggplot(data = subset(formants.F3.norm.trimmed,formant.F3=="F2.F3"))+
         legend.key.width = unit(2, 'cm')
   )+
   scale_x_continuous(breaks = seq(min(formants.F3.norm.trimmed$step,na.rm=T),max(formants.F3.norm.trimmed$step,na.rm=T),20))+
-  xlab("Normalized time (%)")+
+  xlab("Normalized time (%) of vowel preceding coda C")+
   ylab("F3-normalized frequency")
 
 
@@ -455,7 +464,7 @@ not.UL.data <- formants.trimmed %>% filter(!str_detect(speaker,"UL"))
 
 lognorm.F2.not.UL<-ggplot(data = subset(not.UL.data,formant=="F2"))+
   geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
+  geom_smooth(method="loess",aes(x=step,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -467,7 +476,7 @@ lognorm.F2.not.UL<-ggplot(data = subset(not.UL.data,formant=="F2"))+
         legend.key.width = unit(2, 'cm')
   )+
   scale_x_continuous(breaks = seq(min(formants.trimmed$step,na.rm=T),max(formants.trimmed$step,na.rm=T),20))+
-  xlab("Normalized time (%)")+
+  xlab("Normalized time (%) of vowel preceding coda C")+
   ylab("Normalized F2")
 lognorm.F2.not.UL
 
@@ -481,7 +490,7 @@ formants.ms.f2
 
 lognorm.F2.ms<-ggplot(data = formants.ms.f2 %>% filter(ms.before <= 200))+
   # geom_vline(xintercept=median(formants.trimmed$step),lwd=1.5,color="grey60")+
-  geom_smooth(aes(x=ms.before,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
+  geom_smooth(method="loess",aes(x=ms.before,y=log.Fx.norm,color=sec.art,lty=sec.art),lwd=2.5)+
   scale_color_manual(values=colorSet)+
   facet_grid(v~c.place)+
   theme_bw(base_size = 24)+
@@ -505,9 +514,7 @@ cairo_pdf(file="lognorm_F2_ms.pdf",
 dev.off()
 
 
-####################
-# HERE HEREHERE HEREHEREH 
-####################
+
 
 # Extract loess curves, and add lines at appropriate maxima/minima
 loess.curves <- formants.ms.f2 %>% ungroup() %>% select(c.place,sec.art,v,log.Fx.norm,ms.before) %>%
@@ -528,10 +535,17 @@ loess.curves.peaks.selected <- subset(loess.curves.peaks,
 
 
 lognorm.F2.ms.labeled <- lognorm.F2.ms +
-geom_segment(data = loess.curves.peaks.selected, aes(x = ms.before, y = min(loess.curves$loess), yend = loess, color = sec.art), lwd = 1.15, arrow=arrow(length = unit(0.3, "cm"),type = "closed")) +
-geom_label(data=loess.curves.peaks.selected,aes(label=paste0(ms.before,"ms"),x=ms.before+15,y=min(loess.curves$loess)+0.05),size=4)
+geom_segment(data = loess.curves.peaks.selected, aes(x = ms.before, y = min(loess.curves$loess), yend = loess, color = sec.art), lwd = 1.15, arrow=arrow(length = unit(0.3, "cm"),type = "closed"),show.legend = F) +
+geom_label(data=loess.curves.peaks.selected,aes(label=paste0(ms.before,"ms"),x=ms.before+20,y=min(loess.curves$loess)+0.05),size=4.5)
 
-# lognorm.F2.ms.labeled
+
+# Reorder ggplot layers
+lognorm.F2.ms.labeled$layers
+lognorm.F2.ms.labeled$layers <- c(lognorm.F2.ms.labeled$layers[2],
+                                  lognorm.F2.ms.labeled$layers[1],
+                                  lognorm.F2.ms.labeled$layers[3])
+
+lognorm.F2.ms.labeled
 
 # Save w/ cairo
 setwd("")
@@ -539,3 +553,4 @@ cairo_pdf(file="lognorm_F2_ms_labeled.pdf",
           width=10,height=6)
   lognorm.F2.ms.labeled
 dev.off()
+
