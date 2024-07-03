@@ -4,8 +4,6 @@ Here are things you're likely to use:
 - **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings.
 - **FastTrack_formant_data.Rdata** contains a dataframe called *formants* which includes raw formant measurements of our data, produced by the [Fast Track Praat plugin](https://github.com/santiagobarreda/FastTrack), as well as log-additive regression normalized formant values.
 - **F2_trajectory_analysis_FACL.R** produces our formant plots. It depends on **FastTrack_formant_data.Rdata** to load the *formants* dataframe.
-- **int_dur_cog_script.praat** is the script we used to measure center of gravity during stop release bursts. It produces a tab-separated file called *release_log.txt*, but you can just load **cog_measures.Rdata** directly to see our measurements.
-- **cog_measures.Rdata** contains the center of gravity measures produced by **int_dur_cog_script.praat**.
 
 
 Here are things you're *less* likely to use:
