@@ -1,6 +1,6 @@
 # Before running this you need to run
 # loess_plots_Irish_JPhon.R
-# all the way up to line 366 (after the definition of the function plotPolarFits() )
+# all the way up to (and including) the definition of the function plotPolarFits().
 
 library(nabor) # For getting nearest neighbor
 
