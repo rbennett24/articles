@@ -6,6 +6,6 @@
 - **peak_backness_analysis_Irish_JPhon.R** produces our tongue body peak backness analysis.
 - **raw_curves_alldata_Irish_JPhon.zip** is a .zip file containing PDF plots of raw EdgeTrak tracings, annotated for the highest point on the tongue surface.
 - **Irish_pal_contrast_syll_loess_curves_maincomparisons.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings, focusing on comparisons of primary interest in the paper.
-- **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings for every single segmental landmark and context. It's a large file, and so needs to be downloaded here: [formant_Praat_files.zip](https://www.dropbox.com/s/4z3fbnu7paj28u4/Irish_pal_contrast_syll_loess_curves_alldata.zip?dl=1)
+- **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings for every single segmental landmark and context. It's a large file, and so needs to be downloaded here: [Irish_pal_contrast_syll_loess_curves_alldata.zip](https://www.dropbox.com/s/4z3fbnu7paj28u4/Irish_pal_contrast_syll_loess_curves_alldata.zip?dl=1)
   
 ***Contact***: rbennett@ucsc.edu
