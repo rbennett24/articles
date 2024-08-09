@@ -24,6 +24,7 @@ outdir<-paste0(basedir,"")
 library(tidyverse)
 library(ggplot2)
 library(data.table)
+library(numform) # For removing leading zeros
 
 
 ##################
@@ -40,10 +41,10 @@ library(data.table)
 ##################
 
 # Colorblind-friendly color palette (see http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/). 
+# Colorblind-friendly color palette (see http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/). 
 # We're using here the colors they call "CbbPalette", which you can see on that web site. 
 # It says to use "scale_colour_manual(values=CbbPalette) to use these colors for points and lines. 
-# Maybe need that. The code below sets aside 8 colors, but we'll need only 5 for the Russian data. 
-# That's good, because I don't find the final three to be as colorblind-friendly.
+# I don't find the final three to be as colorblind-friendly.
 
 CbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
@@ -66,8 +67,26 @@ library(extrafont)
 # This only needs to be done once on each computer.
 # font_import(prompt = F,pattern="DoulosSIL-R") # Import system fonts -- this can take a while if you import them all
 # loadfonts(device = "win") # I think you only need to do this once so that R imports all the needed files to a place it can draw on them?
-windowsFonts() # This will just show you which fonts are available to R -- it may be a long list!
+# windowsFonts() # This will just show you which fonts are available to R -- it may be a long list!
 
+
+
+##########
+# Recode any factor levels you'd like
+edgetrak.minmax$Vowel <- edgetrak.minmax$Vowel %>% fct_recode("/i\u02D0/" = "/i/",
+                                                              "/u\u02D0/" = "/u/",
+                                                              "/\u0254\u02D0/" = "/a/")
+
+edgetrak.minmax$c.place <- edgetrak.minmax$c.place %>% fct_recode("/P/" = "labial",
+                                                                  "/T/" = "coronal",
+                                                                  "/K/" = "dorsal")
+
+# Add a column for plotting subject codes in mixed dialect-number format
+edgetrak.minmax <- edgetrak.minmax %>% mutate(Speaker = as.factor(paste0(dialect,", Speaker ",
+                                          substr(dialect,1,1),
+                                          substr(subj,2,2))))
+
+edgetrak.minmax <- edgetrak.minmax %>% mutate(subj = as.factor(substr(subj,2,2)))
 
 
 ##################
@@ -400,6 +419,16 @@ plotPolarFits <- function(inputdata,
       # Add small labels
       annotate("text",x=0.2,y=0.8,label="BACK",size=10,family="Charis SIL",fontface="bold")+
       annotate("text",x=0.75,y=0.8,label="FRONT",size=10,family="Charis SIL",fontface="bold")
+    
+      if (plottype=="frm.pos"){
+        ultPlot <- ultPlot + theme(legend.position = c(0.875, 0.4),
+                                 legend.text = element_text(size=24,face="bold"))
+      }
+      else{
+        ultPlot <- ultPlot + theme(legend.position = c(0.86, 0.4),
+                                   legend.text = element_text(size=30,face="bold"))
+      }
+
   }
   
   return(ultPlot)
@@ -944,7 +973,7 @@ plotSet <- c.v.comps.facet %>%
                                        plottype = "Vowel",
                                        plotmaintitle=paste0(#"By vowel context: ",
                                                             unique(.$syll.pos),
-                                                            " s/",unique(.$cmerge),"/", # Consonant
+                                                            "/",unique(.$cmerge),"/", # Consonant
                                                             ", C ",unique(.$frm.pos)              # Frame
                                        ),
                                        plotsubtitle="By dialect and speaker")
@@ -1095,6 +1124,215 @@ rm(k)
 # Note that the 'raw' tracings here are already range (min-max) normalized,
 # so editing will be required to produce plots of non-normalized tracings.
 ############################################################################################
+
+###############################
+# Plot raw contours
+# This can be done after running the code up to creation of final edgetrak data frame.
+###############################
+
+########
+# Here, we produce raw contours grouped and annotated according to our specific research questions.
+# - First, we subset out only those conditions we care about.
+# - We then add highest points of the dorsum (repeating code in peak_backness_analysis_Irish_JPhon.R)
+# - Then, we plot, faceting by certain conditions and including markers for highest dorsal points.
+########
+
+dorsal.peaks.for.plotting <- edgetrak.minmax %>% group_by(Speaker,c.place,v,sec.art,syll.pos,rep,frm.pos) %>%
+                                    # Lower Y values are physically higher, so we look for minimum values.
+                                    slice_min(Y) %>%
+                                    summarize(X = mean(X), # Take mean X value in case of ties/plateaus
+                                              Y = unique(Y)) %>%
+                                    ungroup()
+
+dorsal.peaks.for.plotting <- dorsal.peaks.for.plotting %>% rename(X.peak = X,Y.peak = Y)
+
+edgetrak.minmax.raw.plotting <- left_join(edgetrak.minmax,dorsal.peaks.for.plotting,
+                                by=c("Speaker", "c.place", "sec.art", "v", "syll.pos", "rep", "frm.pos"))
+
+
+# Focus on timestamps actually analyzed in the article.
+summary(edgetrak.minmax.raw.plotting)
+edgetrak.minmax.raw.plotting <- edgetrak.minmax.raw.plotting %>% filter(syll.pos == "Onset" &  frm.pos == "end" | 
+                                                                        syll.pos == "Coda" &  frm.pos == "start")
+
+
+summary(edgetrak.minmax.raw.plotting)
+
+
+# Revalue factors as needed
+edgetrak.minmax.raw.plotting <- edgetrak.minmax.raw.plotting %>% mutate(CPlot = paste0("/",cbasicmerge,sec.art.IPA,"/"))
+
+# We define a standard, semi-generic function for plotting raw ultrasound tracings.
+# This is very similar to plotPolarFits() defined above, but for the moment at least
+# we don't bother trying to combine them into a single function.
+
+ultrasoundRaw <- function(inputdata,
+                          plotmaintitle="",
+                          plotsubtitle="",
+                          dialectFacet=F){
+
+  # Current plotting parameters below make this pointless, but
+  # this makes the title of the legend look nicer when the title is included.
+  inputdata<-inputdata %>% rename(Repetition=rep)
+
+  ultPlot <- ggplot(data=inputdata,
+                    aes(x=X,
+                        y=Y,
+                        group=Repetition,
+                        col=Repetition,
+                        shape=Repetition)
+                    )+
+
+
+    # Using geom_path rather than geom_line preserves the order of points as they appear in the input dataframe.
+    geom_path(lwd=1,na.rm=TRUE,alpha=0.5)+
+    geom_point(size=1,na.rm=TRUE,alpha=0.5)+
+    
+    # Add in the peak points
+    geom_point(aes(x=X.peak,y=Y.peak,group=Repetition), col="black",size=5)+
+
+    ggtitle(plotmaintitle)+
+    labs(subtitle=plotsubtitle)+
+    xlab("Backness (normalized)")+
+    ylab("Height (normalized)")+
+
+    theme_bw(base_size = 22)+
+    theme(legend.key.width=unit(4,"line"),
+          legend.key.height=unit(1,"line"),
+          text = element_text(family = "Charis SIL"),
+          legend.title = element_blank(),
+          legend.text = element_text(size=20)
+          )+
+
+    scale_color_manual(values=CbbPalette)+
+    coord_equal()
+
+    if (dialectFacet==F){
+      ultPlot <- ultPlot+theme(
+      legend.position.inside = c(.01, .99),
+      legend.justification = c("left", "top"),
+      strip.text = element_text(face = "bold",size=32),
+      strip.text.y = element_text(angle = 0)
+      )+
+
+    # BE CAREFUL WITH THE NEXT COMMANDS. I'VE HAD TO SWITCH THE AXIS RANGES DEPENDING
+    # ON WHETHER THE DATA IS RAW, Z-SCORED, OR NORMALIZED.
+
+    scale_y_reverse(limits=c(0.75,-0.2),breaks=seq(-0.2,0.75,0.1),labels = ff_num(zero = 0))+
+    scale_x_continuous(limits=c(0,1),breaks=seq(0,1,0.1),labels = ff_num(zero = 0))+
+
+    annotate("text",x=0.1,y=0.75,label="BACK",size=6,family="Charis SIL",fontface="bold")+
+    annotate("text",x=0.8,y=0.75,label="FRONT",size=6,family="Charis SIL",fontface="bold")
+
+  } else if (dialectFacet==T){
+    # Add faceting
+    ultPlot <- ultPlot+facet_grid(dialect~subj)+theme(strip.text = element_text(face = "bold",size=32))+
+
+      scale_y_reverse(limits=c(0.75,-0.2),breaks=seq(-0.2,0.75,0.1))+
+      scale_x_continuous(limits=c(0,1),breaks=seq(0,1,0.1))+
+
+      # Add small labels
+      annotate("text",x=0.2,y=0.8,label="BACK",size=10,family="Charis SIL",fontface="bold")+
+      annotate("text",x=0.75,y=0.8,label="FRONT",size=10,family="Charis SIL",fontface="bold")
+
+  }
+  
+  # Add condition faceting to speaker-specific plots
+  ultPlot <- ultPlot+facet_grid(CPlot~v)
+  
+  return(ultPlot)
+
+}
+
+
+############
+# Define a function for generating folders for saving PDFs, and for actually saving the PDFs.
+# Assumes the input is a unique row of a grouped tibble with a column containing ggplots
+# This won't work if you use a tibble/dataframe as the input, as currently defined.
+# Also assumes that the variable outdir was set above, as the base directory for storing
+# results.
+#
+# It would be cleaner if this were folded into the makeultPDF() function above, but
+# we go the quick-and-dirty route for now.
+makeultRawPDF<-function(inputRow,fileOutName,allspeakers=F){
+
+  # Set folder for saving plot
+  if (allspeakers==F){
+    # Set folder for saving plot
+    localOutdir <- paste0(outdir,
+                          "/All_speakers_raw_JPhon/"
+                          # inputRow$dialect,"_",inputRow$subj,"_","raw/",
+                          # inputRow$frm.pos
+                          ) # Speaker folder
+
+  } else if (allspeakers==T) {
+    localOutdir <- paste0(outdir,"/All_speakers_raw_JPhon/"
+    )
+
+  }
+
+  if (dir.exists(localOutdir) == T){
+    # Do nothing
+  } else {
+    dir.create(localOutdir,recursive=T) # Create the desired subfolder if necessary, including folders farther up the tree.
+  }
+
+  outname<-paste0(localOutdir,"/",fileOutName,".pdf")
+
+  if (allspeakers==F){
+    cairo_pdf(file=outname,
+              width=14,height=20)
+    print(inputRow$ultrasoundOutput)
+    dev.off()
+  } else if (allspeakers==T){
+    cairo_pdf(file=outname,
+              width=24,height=10)
+    print(inputRow$ultrasoundOutput)
+    dev.off()
+  }
+
+}
+
+
+
+# Set plot template (mostly, set title format, and set data groupings used for producing individual plots --- see groupingVars variable comments above for more information).
+plotSet <- edgetrak.minmax.raw.plotting %>% group_by(.dots = c("dialect", "subj", "syll.pos", "frm.pos")) %>%
+  do(
+    ultrasoundOutput = ultrasoundRaw(inputdata = .,
+                                     plotmaintitle=paste0(unique(.$syll.pos),
+                                                          # " ", unique(.$c.place), # Consonant type
+                                                          ", C ",unique(.$frm.pos)
+                                     ),
+                                     plotsubtitle=paste0("Raw EdgeTrak tracings: ", unique(.$Speaker))
+    )
+
+  )
+
+# subset(plotSet,dialect=="Connacht" & subj =="3" & v =="a" & frm.pos=="mdpt" & syll.pos =="coda")$ultrasoundOutput
+
+
+#########
+# Save PDFs of raw tracings
+for (k in 1:nrow(plotSet)){
+  currplotRow<-plotSet[k,]
+
+  filename<-paste(currplotRow$dialect,
+                  currplotRow$subj,
+                  "raw",
+                  currplotRow$syll.pos,
+                  # currplotRow$cbasicmerge,
+                  # currplotRow$frm.pos,
+                  sep="_")
+
+  makeultRawPDF(currplotRow,
+                filename)
+
+  print(filename)
+}
+rm(k)
+
+
+
 
 
 # ###############################
@@ -1313,176 +1551,4 @@ rm(k)
 # }
 # 
 # 
-# 
-# ##########################
-# # Make raw tracings one rep at a time and mark highest point of tongue
-# # This is a modified copy of the above, with mods noted in *** commments
-# ##########################
-# 
-# # We define a standard, semi-generic function for plotting raw ultrasound tracings.
-# # This is very similar to plotPolarFits() defined above, but for the moment at least
-# # we don't bother trying to combine them into a single function.
-# 
-# ultrasoundRaw <- function(inputdata,
-#                           plotmaintitle="",
-#                           plotsubtitle="",
-#                           dialectFacet=F){
-# 
-#   # Current plotting parameters below make this pointless, but
-#   # this makes the title of the legend look nicer when the title is included.
-# 
-#   # ***Commented out next line and removed the 3 lines using Repetition in aes below.
-# 
-#   #  inputdata<-inputdata %>% rename(Repetition=rep)
-# 
-#       ultPlot <- ggplot(data=inputdata,
-#                     aes(x=X,
-#                         y=Y)
-#                     )+
-# 
-#                       # Using geom_path rather than geom_line preserves the order of points as they appear in the input dataframe.
-#                       geom_path(lwd=1,na.rm=TRUE,alpha=0.5)+
-#                       geom_point(size=2,na.rm=TRUE,alpha=0.5)+
-#                       geom_line(aes(y=min(Y)), col="black")+
-# 
-#                       ggtitle(plotmaintitle)+
-#                       labs(subtitle=plotsubtitle)+
-#                       xlab("Backness (normalized)")+
-#                       ylab("Height (normalized)")+
-# 
-#                       theme_bw(base_size = 22)+
-#                       theme(legend.key.width=unit(4,"line"),
-#                             legend.key.height=unit(1,"line"),
-#                             text = element_text(family = "Charis SIL"),
-#                             legend.title = element_blank(),
-#                             legend.text = element_text(size=20)
-#                       )+
-# 
-#                       scale_color_manual(values=CbbPalette)+
-#                       coord_equal()
-# 
-#                     if (dialectFacet==F){
-#                       ultPlot <- ultPlot+theme(
-#                         legend.position.inside = c(.01, .99),
-#                         legend.justification = c("left", "top"),
-#                       )+
-# 
-#                         # BE CAREFUL WITH THE NEXT COMMANDS. I'VE HAD TO SWITCH THE AXIS RANGES DEPENDING
-#                         # ON WHETHER THE DATA IS RAW, Z-SCORED, OR NORMALIZED.
-# 
-#                         scale_y_reverse(limits=c(0.75,-0.2),breaks=seq(-0.2,0.75,0.1))+
-#                         scale_x_continuous(limits=c(0,1),breaks=seq(0,1,0.1))+
-# 
-#                         annotate("text",x=0.05,y=0.75,label="BACK",size=10,family="Charis SIL",fontface="bold")+
-#                         annotate("text",x=0.9,y=0.75,label="FRONT",size=10,family="Charis SIL",fontface="bold")
-# 
-#                     } else if (dialectFacet==T){
-#                       # Add faceting
-#                       ultPlot <- ultPlot+facet_wrap(dialect~subj)+theme(strip.text = element_text(face = "bold",size=32))+
-# 
-#                         scale_y_reverse(limits=c(0.85,-0.1),breaks=seq(-0.1,0.75,0.1))+
-#                         scale_x_continuous(limits=c(0,1),breaks=seq(0,1,0.2))+
-#                         # Add small labels
-#                         annotate("text",x=0.2,y=0.8,label="BACK",size=10,family="Charis SIL",fontface="bold")+
-#                         annotate("text",x=0.75,y=0.8,label="FRONT",size=10,family="Charis SIL",fontface="bold")
-# 
-#                     }
-# 
-#                     return(ultPlot)
-# 
-# }
-# 
-# 
-# ############
-# # Define a function for generating folders for saving PDFs, and for actually saving the PDFs.
-# # Assumes the input is a unique row of a grouped tibble with a column containing ggplots
-# # This won't work if you use a tibble/dataframe as the input, as currently defined.
-# # Also assumes that the variable outdir was set above, as the base directory for storing
-# # results.
-# #
-# # It would be cleaner if this were folded into the makeultPDF() function above, but
-# # we go the quick-and-dirty route for now.
-# makeultRawPDF<-function(inputRow,fileOutName,allspeakers=F){
-# 
-#   # Set folder for saving plot
-#   if (allspeakers==F){
-#     # Set folder for saving plot
-#     localOutdir <- paste0(outdir,inputRow$dialect, # Dialect
-#                           "/Raw_tracings_highpoint/",
-#                           inputRow$dialect,"_",inputRow$subj,"_","raw/",
-#                           inputRow$frm.pos)
-# 
-#   } else if (allspeakers==T) {
-#     localOutdir <- paste0(outdir,"/All_speakers_raw/tracings_highpoint"
-#     )
-# 
-#   }
-# 
-#   if (dir.exists(localOutdir) == T){
-#     # Do nothing
-#   } else {
-#     dir.create(localOutdir,recursive=T) # Create the desired subfolder if necessary, including folders farther up the tree.
-#   }
-# 
-#   outname<-paste0(localOutdir,"/",fileOutName,".pdf")
-# 
-#   if (allspeakers==F){
-#     cairo_pdf(file=outname,
-#               width=10,height=8)
-#     print(inputRow$ultrasoundOutput)
-#     dev.off()
-#   } else if (allspeakers==T){
-#     cairo_pdf(file=outname,
-#               width=24,height=10)
-#     print(inputRow$ultrasoundOutput)
-#     dev.off()
-#   }
-# 
-# }
-# 
-# 
-# 
-# # Set plot template (mostly, set title format, and set data groupings used for producing individual plots --- see groupingVars variable comments above for more information).
-# # *** Added line for rep below in plot title
-# plotSet <- edgetrak.minmax %>% group_by(.dots = c("dialect", "subj", "cmerge","v", "frm.pos","cbasicpal","Consonant", "rep", "syll.pos")) %>%
-#   do(
-#     ultrasoundOutput = ultrasoundRaw(inputdata = .,
-#                                      plotmaintitle=paste0(.$syll.pos, " /",unique(.$cmerge),"/", # Consonant type
-#                                                           " (=", .$Consonant,")",
-#                                                           ", ", unique(.$Vowel)," context",
-#                                                           ", C ",unique(.$frm.pos),
-#                                                           ", rep ",unique(.$rep)
-#                                      ),
-#                                      plotsubtitle=paste0("Raw EdgeTrak tracings: ", unique(.$Speaker))
-#     )
-# 
-#   )
-# 
-# # subset(plotSet,dialect=="Connacht" & subj =="3" & v =="a" & frm.pos=="mdpt" & syll.pos =="coda")$ultrasoundOutput
-# 
-# 
-# #########
-# # Save PDFs of raw tracings
-#  for (k in 1:nrow(plotSet)){
-# # for (k in 1:20){
-#   currplotRow<-plotSet[k,]
-# 
-#   # ***Added rep below. Also changed "raw" to "minmax". This should be done
-#   # for regular code above for raw tracings too, if using edgetrak.minmax.
-# 
-#   filename<-paste(currplotRow$dialect,
-#                   currplotRow$subj,
-#                   currplotRow$syll.pos,
-#                   "minmax",
-#                   currplotRow$cbasicpal,
-#                   currplotRow$v,
-#                   currplotRow$frm.pos,
-#                   currplotRow$rep,
-#                   sep="_")
-# 
-#   makeultRawPDF(currplotRow,
-#                 filename)
-# 
-#   print(filename)
-# }
-# rm(k)
+#
