@@ -2,6 +2,7 @@ Here are things you're likely to use:
 - **tongue_peaks_Irish_FACL.RData** contains a dataframe called *Tongue.peaks* which includes backness values for the highest point on the dorsum for each of our raw EdgeTrak tracings.
 - **find_gesture_extrema_FACL.R** produces our timing analysis.
 - **Irish_pal_contrast_syll_loess_curves_alldata.zip** is a .zip file containing PDF plots of loess-smoothed EdgeTrak tracings.
+- **raw_curves_alldata_Irish_JPhon.zip** is a .zip file containing PDF plots of raw EdgeTrak tracings, annotated for the highest point on the tongue surface.
 - **FastTrack_formant_data.Rdata** contains a dataframe called *formants* which includes raw formant measurements of our data, produced by the [Fast Track Praat plugin](https://github.com/santiagobarreda/FastTrack), as well as log-additive regression normalized formant values.
 - **F2_trajectory_analysis_FACL.R** produces our formant plots. It depends on **FastTrack_formant_data.Rdata** to load the *formants* dataframe.
 
