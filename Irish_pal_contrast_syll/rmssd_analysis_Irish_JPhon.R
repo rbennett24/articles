@@ -139,6 +139,11 @@ head(rmssd.raw.polar.trim)
 rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.rep=substr(Pair.Index,1,1),
                                                         pal.rep=substr(Pair.Index,3,3))
 
+# Change factor names if you want
+rmssd.raw.polar.trima$c.place <- rmssd.raw.polar.trim$c.place %>% fct_recode("labial" = "/P/",
+                                                                    "coronal" = "/T/",
+                                                                    "dorsal" = "/K/")
+
 # Add voicing back in as a factor.
 rmssd.raw.polar.trim <- rmssd.raw.polar.trim %>% mutate(vel.voicing = case_when(
                                 c.place == "labial" & v == "i" & syll.pos=="Onset" ~ "voiced",
@@ -709,7 +714,7 @@ res.table <- res.table %>%  mutate(across('Predictor', str_replace, 'vel.rep', '
 res.table
 
 # Clean up p-values
-res.table <- res.table %>% mutate(p = case_when((p.numeric < 0.05 & p.numeric >= 0.01) ~ "< .05*",
+res.table <- res.table %>% mutate(p = case_when((p.numeric <= 0.05 & p.numeric >= 0.01) ~ "< .05*",
                                                 (p.numeric < 0.01 & p.numeric >= 0.001) ~ "< .01*",
                                                 (p.numeric < 0.001) ~ "< .001*",
                                                 .default = substr(round(p.numeric,2),2,4)

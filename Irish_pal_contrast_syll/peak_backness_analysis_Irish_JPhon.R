@@ -460,7 +460,7 @@ res.table
 
 
 # Clean up p-values
-res.table <- res.table %>% mutate(p = case_when((p.numeric < 0.05 & p.numeric >= 0.01) ~ "< .05*",
+res.table <- res.table %>% mutate(p = case_when((p.numeric <= 0.05 & p.numeric >= 0.01) ~ "< .05*",
                                                 (p.numeric < 0.01 & p.numeric >= 0.001) ~ "< .01*",
                                                 (p.numeric < 0.001) ~ "< .001*",
                                                 .default = substr(round(p.numeric,2),2,4)
