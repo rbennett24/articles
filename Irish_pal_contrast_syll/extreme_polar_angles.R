@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # Set directory for saving PDFs, reading in data frames
-setwd("C:/Users/Tiamat/Dropbox/Research/Irish/Irish_ultrasound_shared/Scripts/R scripts/HISPhonCog/")
+setwd("")
 
 # Read in the data we'll use to find the point of maximum extension from the polar origin. 
 # edgetrak.minmax is the data frame
@@ -113,13 +113,15 @@ summary(corr.DF$th.polarpeak)
 corr.vals <- corr.DF %>% group_by(dialect,subj) %>% summarize(corr = round(cor(X.ypeak, X.polarpeak),2))
 corr.vals
 
+corr.vals.all <- corr.vals
+
 backness.corr.plot<-ggplot(data=corr.DF) + 
                     geom_point(aes(x=X.ypeak,y=X.polarpeak),alpha=0.75) +
                     geom_smooth(aes(x=X.ypeak,y=X.polarpeak),method="lm") +
                     facet_grid(dialect~subj) +
-                    theme_bw(base_size = 16) +
+                    theme_bw(base_size = 30) +
                     labs(x="Backness of dorsal peak", y="Backness of point farthest from polar origin") +
-                    geom_label(data=corr.vals,aes(label=paste0("r = ",corr)),x=0.2,y=1,size=5)
+                    geom_label(data=corr.vals,aes(label=corr),x=0.225,y=0.9,size=8.5)
 
 backness.corr.plot
 
@@ -134,12 +136,19 @@ dev.off()
 corr.vals <- corr.DF %>% group_by(dialect,subj) %>% summarize(corr = round(cor(X.ypeak, th.polarpeak),2))
 corr.vals
 
+corr.vals.all <- rbind(corr.vals.all,corr.vals)
+corr.vals.all
+range(abs(corr.vals.all$corr))
+mean(abs(corr.vals.all$corr))
+median(abs(corr.vals.all$corr))
+sd(abs(corr.vals.all$corr))
+
 backness.angle.corr.plot <- ggplot(data=corr.DF) +
                             geom_point(aes(x=X.ypeak,y=th.polarpeak),alpha=0.75) +
                             geom_smooth(aes(x=X.ypeak,y=th.polarpeak),method="lm") +
-                            facet_grid(dialect~subj)+theme_bw(base_size = 16) +
+                            facet_grid(dialect~subj)+theme_bw(base_size = 30) +
                             labs(x="Backness of dorsal peak", y="Angle of point farthest from polar origin") +
-                            geom_label(data=corr.vals,aes(label=corr),x=0.2,y=0.5,size=4.5)
+                            geom_label(data=corr.vals,aes(label=corr),x=0.225,y=0.725,size=8.5)
 
 backness.angle.corr.plot
 
